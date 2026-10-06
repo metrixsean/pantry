@@ -54,3 +54,34 @@ export const XANO_HOST: string =
   (typeof window !== "undefined" && window.XANO_HOST) ||
   import.meta.env.VITE_XANO_HOST ||
   "";
+
+import type { InferResponse } from "@xano/sdk";
+import type { listItems, listLocations } from "../../../xano/api/items.js";
+import { ROUTES, routePath, type RouteInputs } from "../../../xano/routes.gen.js";
+
+export type Item = InferResponse<typeof listItems>[number];
+export type Location = InferResponse<typeof listLocations>[number];
+export type NewItem = RouteInputs["POST create_item"];
+
+async function call<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(XANO_HOST + url, init);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export function getLocations(): Promise<Location[]> {
+  return call(routePath("GET list_locations"));
+}
+
+export function getItems(query: RouteInputs["GET list_items"] = {}): Promise<Item[]> {
+  const qs = query.location_id === undefined ? "" : `?location_id=${query.location_id}`;
+  return call(routePath("GET list_items") + qs);
+}
+
+export function addItem(body: NewItem): Promise<Item> {
+  return call(routePath("POST create_item"), {
+    method: ROUTES["POST create_item"].verb,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
