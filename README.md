@@ -1,8 +1,10 @@
 # pantry
 
-[![Built on Xano](https://img.shields.io/badge/built_on-Xano-0055FF)](https://xano.com)
+what's in the kitchen, where it lives, and when it goes off. a shared inventory for a household 🥫
 
-_Describe pantry here: what it does and who it is for._
+each item has a location (pantry, fridge, freezer), a quantity and unit, and an expiry date.
+the home page lists everything in stock, soonest to expire first, and lets you add more.
+not here yet: logins and invite codes, the shopping list, the nightly expiry job.
 
 The backend under [`xano/`](xano/) is TypeScript, authored with the
 [Xano SDK](https://github.com/xano-sdk/sdk) and running on [Xano](https://xano.com). It runs
@@ -18,9 +20,9 @@ npm run xano:deploy   # run the backend on the Xano Engine, on this machine
 npm run dev           # run the frontend, already pointed at it
 ```
 
-No Xano account needed. Then author your backend in [`xano/index.ts`](xano/index.ts),
-starting with the walkthrough in [`xano/EXAMPLE.md`](xano/EXAMPLE.md), and rerun
-`npm run xano:deploy` after each change.
+No Xano account needed. The tables live in [`xano/tables/`](xano/tables/) and the endpoints in
+[`xano/api/`](xano/api/). Rerun `npm run xano:deploy` after each backend change. A fresh
+deploy seeds one household with pantry, fridge and freezer locations.
 
 ## Run it on your machine
 
