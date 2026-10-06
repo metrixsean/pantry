@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "objects": {
+    "app:items": {
+      "guid": "e04745fcedbbd1633e0ed29ea82567a9",
+      "canonical": "items",
+      "canonical_source": "code"
+    },
+    "dbo:household": {
+      "guid": "6bb585c3092a844e33e5174d47d5d5fc"
+    },
+    "dbo:item": {
+      "guid": "6af51aa538418a14f613d30184410c9d"
+    },
+    "dbo:location": {
+      "guid": "26602b46980b3dc90d9f64fce2ced15e"
+    },
+    "query:items|GET|list_items": {
+      "guid": "0f060be10d636ba0280a1e68f8480d15"
+    },
+    "query:items|GET|list_locations": {
+      "guid": "53137aaf076df64e77ee4bab3d39e6b3"
+    },
+    "query:items|POST|create_item": {
+      "guid": "d0ce2cce820ad86fb4ca2f07d65105a3"
+    }
+  }
+}
