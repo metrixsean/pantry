@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import Settings from "@lucide/svelte/icons/settings";
 
   import * as Card from "$lib/components/ui/card/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
@@ -74,7 +75,12 @@
 <main class="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 p-8">
   <div class="flex items-center justify-between">
     <h1 class="text-3xl font-semibold tracking-tight">pantry</h1>
-    <ModeToggle />
+    <div class="flex items-center gap-1">
+      <Button variant="ghost" size="icon" href="/settings" aria-label="Settings">
+        <Settings />
+      </Button>
+      <ModeToggle />
+    </div>
   </div>
 
   {#if error}
@@ -112,7 +118,9 @@
               <span>{item.name}</span>
               <span class="text-muted-foreground text-sm">
                 {item.quantity} {item.unit} · {locationName(item.location_id)}
-                {#if item.expires_on}· {item.expires_on}{/if}
+                {#if item.expires_on}·
+                  <span class={item.expiring ? "text-destructive" : ""}>{item.expires_on}</span>
+                {/if}
               </span>
             </li>
           {/each}

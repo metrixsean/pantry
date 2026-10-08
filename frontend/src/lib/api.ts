@@ -57,11 +57,16 @@ export const XANO_HOST: string =
 
 import type { InferResponse } from "@xano/sdk";
 import type { listItems, listLocations } from "../../../xano/api/items.js";
+import type { getHousehold } from "../../../xano/api/household.js";
 import { ROUTES, routePath, type RouteInputs } from "../../../xano/routes.gen.js";
 
 export type Item = InferResponse<typeof listItems>[number];
 export type Location = InferResponse<typeof listLocations>[number];
 export type NewItem = RouteInputs["POST create_item"];
+export type Household = InferResponse<typeof getHousehold>;
+
+// one shared kitchen until invite codes land
+export const HOUSEHOLD_ID = 1;
 
 async function call<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(XANO_HOST + url, init);
@@ -83,5 +88,19 @@ export function addItem(body: NewItem): Promise<Item> {
     method: ROUTES["POST create_item"].verb,
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
+  });
+}
+
+export function getHouseholdSettings(): Promise<Household> {
+  return call(routePath("GET household/{household_id}", { household_id: HOUSEHOLD_ID }));
+}
+
+export function setAlertEmail(
+  alert_email: RouteInputs["PATCH household/{household_id}"]["alert_email"],
+): Promise<Household> {
+  return call(routePath("PATCH household/{household_id}", { household_id: HOUSEHOLD_ID }), {
+    method: ROUTES["PATCH household/{household_id}"].verb,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ alert_email }),
   });
 }
