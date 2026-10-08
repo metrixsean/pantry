@@ -9,6 +9,10 @@ export const item = table({
     quantity: f.decimal({ required: true }),
     unit: f.text(),
     expires_on: f.date(),
+    expiring: f.bool({ default: false }),
   },
-  index: [{ type: "btree", fields: [{ name: "location_id" }] }],
+  index: [
+    { type: "btree", fields: [{ name: "location_id" }] },
+    { type: "btree", fields: [{ name: "expires_on" }] },
+  ],
 });
