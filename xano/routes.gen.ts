@@ -82,6 +82,8 @@ function fillParams(
 }
 
 export const ROUTES = {
+  "GET household/{household_id}": { verb: "GET", path: "/api:household/household/{household_id}" },
+  "PATCH household/{household_id}": { verb: "PATCH", path: "/api:household/household/{household_id}" },
   "POST create_item": { verb: "POST", path: "/api:items/create_item" },
   "GET list_items": { verb: "GET", path: "/api:items/list_items" },
   "GET list_locations": { verb: "GET", path: "/api:items/list_locations" },
@@ -98,6 +100,8 @@ type ManyRoutes<N> = [(N extends unknown ? (x: N) => void : never) extends (x: i
 
 /** A union of route names (e.g. a `key: RouteName` parameter): params checked at runtime. */
 export function routePath<N extends RouteName>(name: ManyRoutes<N>, params?: Record<string, string | number>): string;
+export function routePath(name: "GET household/{household_id}", params: { "household_id": string | number }): string;
+export function routePath(name: "PATCH household/{household_id}", params: { "household_id": string | number }): string;
 export function routePath(name: "POST create_item"): string;
 export function routePath(name: "GET list_items"): string;
 export function routePath(name: "GET list_locations"): string;
@@ -122,6 +126,13 @@ export function routePath(name: RouteName, params?: Record<string, string | numb
  * the linked table's columns, which is what the server accepts.
  */
 export type RouteInputs = {
+  "GET household/{household_id}": {
+    household_id: number;
+  };
+  "PATCH household/{household_id}": {
+    household_id: number;
+    alert_email?: string | null;
+  };
   "POST create_item": {
     name: string;
     location_id: number;

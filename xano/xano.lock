@@ -1,6 +1,11 @@
 {
   "version": 1,
   "objects": {
+    "app:household": {
+      "guid": "3290830a6c79e70f6d802bd23fa8835b",
+      "canonical": "household",
+      "canonical_source": "code"
+    },
     "app:items": {
       "guid": "e04745fcedbbd1633e0ed29ea82567a9",
       "canonical": "items",
@@ -15,6 +20,18 @@
     "dbo:location": {
       "guid": "26602b46980b3dc90d9f64fce2ced15e"
     },
+    "function:check_expiring_items": {
+      "guid": "10f2e242a7dcfb935155ad06a45d3d58"
+    },
+    "function:expiry_digest": {
+      "guid": "7b59e4c43defade6f78d1a7ee4c7136f"
+    },
+    "query:household|GET|household/{household_id}": {
+      "guid": "77d46f3d3dfdfefd87cbaf0e8ce18039"
+    },
+    "query:household|PATCH|household/{household_id}": {
+      "guid": "23ac8d729e65479bab64359351acd2b0"
+    },
     "query:items|GET|list_items": {
       "guid": "0f060be10d636ba0280a1e68f8480d15"
     },
@@ -23,6 +40,12 @@
     },
     "query:items|POST|create_item": {
       "guid": "d0ce2cce820ad86fb4ca2f07d65105a3"
+    },
+    "task:nightly_expiry_check": {
+      "guid": "1b962a8e850511d9198f7fa253297935"
+    },
+    "workflow_test:expiry check flags each item once": {
+      "guid": "f60c9ff6b649bcf83e6df6840e53d00f"
     }
   }
 }
