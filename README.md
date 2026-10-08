@@ -4,7 +4,19 @@ what's in the kitchen, where it lives, and when it goes off. a shared inventory 
 
 each item has a location (pantry, fridge, freezer), a quantity and unit, and an expiry date.
 the home page lists everything in stock, soonest to expire first, and lets you add more.
-not here yet: logins and invite codes, the shopping list, the nightly expiry job.
+not here yet: logins and invite codes, the shopping list.
+
+## 📧 expiry alerts
+
+every night `nightly_expiry_check` flags anything with stock left that expires within 3 days
+and emails the household a list of the newly flagged stuff. each item gets one email, not one
+a night until you finally eat it. push an expiry date back (or restock) and the flag clears,
+so it can warn you again next time.
+
+set the address on `/settings`; leave it blank and you still get the flags, just no email.
+it sends through Xano's built-in mailer, so there's no API key to set up. the logic lives in
+[`xano/functions/expiry.ts`](xano/functions/expiry.ts) and `npm run xano:test` runs its tests
+against a deployed backend.
 
 The backend under [`xano/`](xano/) is TypeScript, authored with the
 [Xano SDK](https://github.com/xano-sdk/sdk) and running on [Xano](https://xano.com). It runs
