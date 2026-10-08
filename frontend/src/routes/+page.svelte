@@ -22,6 +22,24 @@
     return locations.find((l) => l.id === id)?.name ?? "?";
   }
 
+  function isExpiringSoon(expiresOn: string | null): boolean {
+    if (!expiresOn) return false;
+    const expDate = new Date(expiresOn);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const threeDaysAhead = new Date(today);
+    threeDaysAhead.setDate(threeDaysAhead.getDate() + 3);
+    return expDate <= threeDaysAhead && expDate >= today;
+  }
+
+  function getExpiringCountForLocation(locationId: number): number {
+    return items.filter((item) => item.location_id === locationId && isExpiringSoon(item.expires_on)).length;
+  }
+
+  function getTotalCountForLocation(locationId: number): number {
+    return items.filter((item) => item.location_id === locationId).length;
+  }
+
   async function load() {
     try {
       [locations, items] = await Promise.all([getLocations(), getItems()]);
@@ -62,6 +80,22 @@
   {#if error}
     <p class="text-destructive text-sm">{error}</p>
   {/if}
+
+  <div class="grid grid-cols-3 gap-3">
+    {#each locations as loc (loc.id)}
+      <Card.Root>
+        <Card.Content class="pt-6">
+          <div class="flex flex-col gap-2">
+            <p class="font-semibold text-sm">{loc.name}</p>
+            {#if getExpiringCountForLocation(loc.id) > 0}
+              <p class="text-destructive text-xs">{getExpiringCountForLocation(loc.id)} expiring soon</p>
+            {/if}
+            <p class="text-muted-foreground text-xs">{getTotalCountForLocation(loc.id)} total</p>
+          </div>
+        </Card.Content>
+      </Card.Root>
+    {/each}
+  </div>
 
   <Card.Root>
     <Card.Header>
