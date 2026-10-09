@@ -22,6 +22,7 @@ export const updateHousehold = query({
   input: {
     household_id: input.int({ required: true }),
     alert_email: input.email({ nullable: true, methods: ["lower"] }),
+    alert_frequency: input.enum(["daily", "weekly"], { nullable: true }),
   },
   stack: [
     s.db.get({ table: household, fieldValue: inp("household_id"), as: "house" }),
@@ -29,7 +30,7 @@ export const updateHousehold = query({
     s.db.edit({
       table: household,
       fieldValue: inp("household_id"),
-      row: { alert_email: inp("alert_email") },
+      row: { alert_email: inp("alert_email"), alert_frequency: inp("alert_frequency") },
       as: "updated",
     }),
   ],

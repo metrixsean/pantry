@@ -13,6 +13,9 @@ and emails the household a list of the newly flagged stuff. each item gets one e
 a night until you finally eat it. push an expiry date back (or restock) and the flag clears,
 so it can warn you again next time.
 
+prefer one email a week? pick weekly on `/settings` and you get a single monday digest of everything
+due in the next 7 days instead.
+
 set the address on `/settings`; leave it blank and you still get the flags, just no email.
 it sends through Xano's built-in mailer, so there's no API key to set up. the logic lives in
 [`xano/functions/expiry.ts`](xano/functions/expiry.ts) and `npm run xano:test` runs its tests

@@ -132,6 +132,7 @@ export type RouteInputs = {
   "PATCH household/{household_id}": {
     household_id: number;
     alert_email?: string | null;
+    alert_frequency?: "daily" | "weekly" | null;
   };
   "POST create_item": {
     name: string;

@@ -20,6 +20,10 @@ import { location } from "../tables/location.js";
 import { item } from "../tables/item.js";
 
 export const EXPIRY_WINDOW_DAYS = 3;
+export const WEEKLY_WINDOW_DAYS = 7;
+
+const DAILY_NOTE = "(pantry checks every night, you'll only hear about each item once)";
+const WEEKLY_NOTE = "(this one comes every monday, it lists everything due in the coming week)";
 
 export const expiryDigest = defineFunction({
   name: "expiry_digest",
@@ -27,6 +31,8 @@ export const expiryDigest = defineFunction({
   input: {
     household: input.text({ required: true }),
     items: input.json({ required: true }),
+    days: input.int({ required: true }),
+    note: input.text({ required: true }),
   },
   stack: [
     s.set_var("count", withFilters(inp("items"), fl.count())),
@@ -62,9 +68,12 @@ export const expiryDigest = defineFunction({
     s.set_var(
       "message",
       withFilters(
-        c.text(`Use these up in the next ${EXPIRY_WINDOW_DAYS} days:\n\n`),
+        c.text("Use these up in the next "),
+        fl.concat(withFilters(inp("days"), fl.to_text())),
+        fl.concat(" days:\n\n"),
         fl.concat(withFilters(ref("lines"), fl.join("\n"))),
-        fl.concat("\n\n(pantry checks every night, you'll only hear about each item once)"),
+        fl.concat("\n\n"),
+        fl.concat(inp("note")),
       ),
     ),
   ],
@@ -74,17 +83,35 @@ export const expiryDigest = defineFunction({
       name: "one item",
       input: {
         household: c.text("home"),
+        days: c.int(EXPIRY_WINDOW_DAYS),
+        note: c.text(DAILY_NOTE),
         items: c.array([{ name: "milk", location: "fridge", expires_on: "2026-10-10" }]),
       },
       expect: [
         expect.to_equal(resp("subject"), c.text("1 thing in home going off soon")),
         expect.to_contain(resp("message"), c.text("- milk (fridge), use by 2026-10-10")),
+        expect.to_contain(resp("message"), c.text("next 3 days")),
+      ],
+    },
+    {
+      name: "weekly note",
+      input: {
+        household: c.text("home"),
+        days: c.int(WEEKLY_WINDOW_DAYS),
+        note: c.text(WEEKLY_NOTE),
+        items: c.array([{ name: "rice", location: "pantry", expires_on: "2026-10-14" }]),
+      },
+      expect: [
+        expect.to_contain(resp("message"), c.text("next 7 days")),
+        expect.to_contain(resp("message"), c.text("every monday")),
       ],
     },
     {
       name: "a few items",
       input: {
         household: c.text("flat 4"),
+        days: c.int(EXPIRY_WINDOW_DAYS),
+        note: c.text(DAILY_NOTE),
         items: c.array([
           { name: "yoghurt", location: "fridge", expires_on: "2026-10-09" },
           { name: "peas", location: "freezer", expires_on: "2026-10-11" },
@@ -101,7 +128,7 @@ export const expiryDigest = defineFunction({
 export const checkExpiringItems = defineFunction({
   name: "check_expiring_items",
   description:
-    "Flags stocked items expiring within the window, clears the flag on ones that moved out of it, and emails each household its newly flagged items once.",
+    "Flags stocked items expiring within the window, clears the flag on ones that moved out of it, and emails each household by its alert_frequency: newly flagged items nightly, or the coming week's items on mondays.",
   stack: [
     s.set_var(
       "cutoff",
@@ -142,6 +169,32 @@ export const checkExpiringItems = defineFunction({
       body: [s.db.edit({ table: item, fieldValue: ref("row.id"), row: { expiring: false } })],
     }),
     s.set_var("by_household", withFilters(ref("fresh"), fl.index_by("household_id"))),
+    s.set_var("week_by_household", c.obj({})),
+    s.conditional({
+      when: expr(withFilters(c.now(), fl.epochms_date("N", "UTC")), "=", c.text("1")),
+      then: [
+        s.set_var(
+          "week_cutoff",
+          withFilters(c.now(), fl.epochms_add_secs(WEEKLY_WINDOW_DAYS * 86400), fl.epochms_date("Y-m-d", "UTC")),
+        ),
+        s.db.query({
+          table: item,
+          bind: [{ table: location, as: "loc", where: expr(col("location_id"), "=", col("loc.id")) }],
+          where: [
+            expr(col("quantity"), ">", c.decimal(0)),
+            expr(col("expires_on"), "!=", c.null()),
+            expr(col("expires_on"), "<=", ref("week_cutoff")),
+          ],
+          eval: [
+            { name: "loc.name", as: "location" },
+            { name: "loc.household_id", as: "household_id" },
+          ],
+          sort: [{ sortBy: "expires_on", dir: "asc" }],
+          as: "week_items",
+        }),
+        s.update_var("week_by_household", withFilters(ref("week_items"), fl.index_by("household_id"))),
+      ],
+    }),
     s.db.query({ table: household, as: "households" }),
     s.set_var("emailed", c.int(0)),
     s.foreach({
@@ -149,12 +202,22 @@ export const checkExpiringItems = defineFunction({
       as: "h",
       body: [
         s.set_var("due", withFilters(ref("by_household"), fl.get(ref("h.id"), c.array([])))),
+        s.set_var("days", c.int(EXPIRY_WINDOW_DAYS)),
+        s.set_var("note", c.text(DAILY_NOTE)),
+        s.conditional({
+          when: expr(ref("h.alert_frequency"), "=", c.text("weekly")),
+          then: [
+            s.update_var("due", withFilters(ref("week_by_household"), fl.get(ref("h.id"), c.array([])))),
+            s.update_var("days", c.int(WEEKLY_WINDOW_DAYS)),
+            s.update_var("note", c.text(WEEKLY_NOTE)),
+          ],
+        }),
         s.conditional({
           when: and(cond.notEmpty(ref("h.alert_email")), cond.notEmpty(ref("due"))),
           then: [
             s.function.run({
               fn: expiryDigest,
-              input: { household: ref("h.name"), items: ref("due") },
+              input: { household: ref("h.name"), items: ref("due"), days: ref("days"), note: ref("note") },
               as: "digest",
             }),
             s.util.send_email({

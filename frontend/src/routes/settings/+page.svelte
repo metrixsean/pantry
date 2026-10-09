@@ -6,10 +6,11 @@
   import * as Card from "$lib/components/ui/card/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import ModeToggle from "$lib/components/mode-toggle.svelte";
-  import { getHouseholdSettings, setAlertEmail, type Household } from "$lib/api";
+  import { getHouseholdSettings, setAlertSettings, type Household } from "$lib/api";
 
   let house = $state<Household | undefined>();
   let alertEmail = $state("");
+  let frequency = $state<"daily" | "weekly">("daily");
   let error = $state("");
   let saved = $state(false);
   let saving = $state(false);
@@ -20,6 +21,7 @@
     try {
       house = await getHouseholdSettings();
       alertEmail = house.alert_email ?? "";
+      frequency = house.alert_frequency ?? "daily";
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
     }
@@ -31,8 +33,12 @@
     saved = false;
     error = "";
     try {
-      house = await setAlertEmail(alertEmail.trim() || null);
+      house = await setAlertSettings({
+        alert_email: alertEmail.trim() || null,
+        alert_frequency: frequency,
+      });
       alertEmail = house.alert_email ?? "";
+      frequency = house.alert_frequency ?? "daily";
       saved = true;
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
@@ -72,8 +78,9 @@
     <Card.Header>
       <Card.Title class="flex items-center gap-2"><Bell class="size-4" /> expiry alerts</Card.Title>
       <Card.Description>
-        every night we check for stuff that goes off within 3 days and email the new ones here.
-        leave it blank to turn alerts off.
+        daily: every night we email the stuff that just came within 3 days of going off.
+        weekly: one email on monday with everything due in the next 7 days.
+        leave the address blank to turn alerts off.
       </Card.Description>
     </Card.Header>
     <form onsubmit={save}>
@@ -85,12 +92,16 @@
           bind:value={alertEmail}
           oninput={() => (saved = false)}
         />
+        <select class="{field} mt-3" bind:value={frequency} onchange={() => (saved = false)}>
+          <option value="daily">daily</option>
+          <option value="weekly">weekly (mondays)</option>
+        </select>
       </Card.Content>
       <Card.Footer class="flex items-center gap-3">
         <Button type="submit" disabled={saving || !house}>save</Button>
         {#if saved}
           <span class="text-muted-foreground text-sm">
-            {house?.alert_email ? `alerts go to ${house.alert_email}` : "alerts are off"}
+            {house?.alert_email ? `${house.alert_frequency ?? "daily"} alerts go to ${house.alert_email}` : "alerts are off"}
           </span>
         {/if}
       </Card.Footer>
