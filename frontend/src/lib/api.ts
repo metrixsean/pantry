@@ -95,12 +95,12 @@ export function getHouseholdSettings(): Promise<Household> {
   return call(routePath("GET household/{household_id}", { household_id: HOUSEHOLD_ID }));
 }
 
-export function setAlertEmail(
-  alert_email: RouteInputs["PATCH household/{household_id}"]["alert_email"],
+export function setAlertSettings(
+  body: Omit<RouteInputs["PATCH household/{household_id}"], "household_id">,
 ): Promise<Household> {
   return call(routePath("PATCH household/{household_id}", { household_id: HOUSEHOLD_ID }), {
     method: ROUTES["PATCH household/{household_id}"].verb,
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ alert_email }),
+    body: JSON.stringify(body),
   });
 }
