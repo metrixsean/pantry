@@ -11,6 +11,9 @@
       "canonical": "items",
       "canonical_source": "code"
     },
+    "dbo:alert_log": {
+      "guid": "33e292b659033c99d44a85ecd7229964"
+    },
     "dbo:household": {
       "guid": "6bb585c3092a844e33e5174d47d5d5fc"
     },
@@ -28,6 +31,9 @@
     },
     "query:household|GET|household/{household_id}": {
       "guid": "77d46f3d3dfdfefd87cbaf0e8ce18039"
+    },
+    "query:household|GET|household/{household_id}/alerts": {
+      "guid": "e9ffa8cda11ef78afe1544b5f258a782"
     },
     "query:household|PATCH|household/{household_id}": {
       "guid": "23ac8d729e65479bab64359351acd2b0"

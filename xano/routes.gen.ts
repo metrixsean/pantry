@@ -84,6 +84,7 @@ function fillParams(
 export const ROUTES = {
   "GET household/{household_id}": { verb: "GET", path: "/api:household/household/{household_id}" },
   "PATCH household/{household_id}": { verb: "PATCH", path: "/api:household/household/{household_id}" },
+  "GET household/{household_id}/alerts": { verb: "GET", path: "/api:household/household/{household_id}/alerts" },
   "POST create_item": { verb: "POST", path: "/api:items/create_item" },
   "GET list_items": { verb: "GET", path: "/api:items/list_items" },
   "GET list_locations": { verb: "GET", path: "/api:items/list_locations" },
@@ -102,6 +103,7 @@ type ManyRoutes<N> = [(N extends unknown ? (x: N) => void : never) extends (x: i
 export function routePath<N extends RouteName>(name: ManyRoutes<N>, params?: Record<string, string | number>): string;
 export function routePath(name: "GET household/{household_id}", params: { "household_id": string | number }): string;
 export function routePath(name: "PATCH household/{household_id}", params: { "household_id": string | number }): string;
+export function routePath(name: "GET household/{household_id}/alerts", params: { "household_id": string | number }): string;
 export function routePath(name: "POST create_item"): string;
 export function routePath(name: "GET list_items"): string;
 export function routePath(name: "GET list_locations"): string;
@@ -133,6 +135,9 @@ export type RouteInputs = {
     household_id: number;
     alert_email?: string | null;
     alert_frequency?: "daily" | "weekly" | null;
+  };
+  "GET household/{household_id}/alerts": {
+    household_id: number;
   };
   "POST create_item": {
     name: string;

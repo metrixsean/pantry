@@ -18,6 +18,7 @@ import {
 import { household } from "../tables/household.js";
 import { location } from "../tables/location.js";
 import { item } from "../tables/item.js";
+import { alertLog } from "../tables/alert_log.js";
 
 export const EXPIRY_WINDOW_DAYS = 3;
 export const WEEKLY_WINDOW_DAYS = 7;
@@ -225,6 +226,17 @@ export const checkExpiringItems = defineFunction({
               to: ref("h.alert_email"),
               subject: ref("digest.subject"),
               message: ref("digest.message"),
+            }),
+            s.db.add({
+              table: alertLog,
+              row: {
+                household_id: ref("h.id"),
+                sent_to: ref("h.alert_email"),
+                frequency: withFilters(ref("h.alert_frequency"), fl.first_notnull(c.text("daily"))),
+                item_count: withFilters(ref("due"), fl.count()),
+                subject: ref("digest.subject"),
+                sent_at: c.now(),
+              },
             }),
             s.update_var("emailed", withFilters(ref("emailed"), fl.add(1))),
           ],
