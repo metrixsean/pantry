@@ -16,6 +16,8 @@ so it can warn you again next time.
 prefer one email a week? pick weekly on `/settings` and you get a single monday digest of everything
 due in the next 7 days instead.
 
+every email sent is logged, and `/settings` shows the last 30 so you can check what went out and when.
+
 set the address on `/settings`; leave it blank and you still get the flags, just no email.
 it sends through Xano's built-in mailer, so there's no API key to set up. the logic lives in
 [`xano/functions/expiry.ts`](xano/functions/expiry.ts) and `npm run xano:test` runs its tests

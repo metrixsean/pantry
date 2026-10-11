@@ -1,7 +1,8 @@
-import { workflowTest, s, c, fl, ref, withFilters } from "@xano/sdk";
+import { workflowTest, s, c, fl, ref, col, expr, withFilters } from "@xano/sdk";
 import { household } from "../tables/household.js";
 import { location } from "../tables/location.js";
 import { item } from "../tables/item.js";
+import { alertLog } from "../tables/alert_log.js";
 import { checkExpiringItems } from "../functions/expiry.js";
 
 const daysFromNow = (days: number) =>
@@ -10,7 +11,11 @@ const daysFromNow = (days: number) =>
 export const expiryCheckFlagsOnce = workflowTest({
   name: "expiry check flags each item once",
   stack: [
-    s.db.add({ table: household, row: { name: "test house", invite_code: "wf-expiry" }, as: "house" }),
+    s.db.add({
+      table: household,
+      row: { name: "test house", invite_code: "wf-expiry", alert_email: "kitchen@example.com" },
+      as: "house",
+    }),
     s.db.add({ table: location, row: { name: "fridge", household_id: ref("house.id") }, as: "fridge" }),
     s.set_var("tomorrow", daysFromNow(1)),
     s.set_var("next_month", daysFromNow(30)),
@@ -39,7 +44,16 @@ export const expiryCheckFlagsOnce = workflowTest({
     s.function.call({ fn: checkExpiringItems, as: "first" }),
     s.expect.to_equal({ expr: ref("first.flagged"), value: c.int(1) }),
     s.expect.to_equal({ expr: ref("first.cleared"), value: c.int(1) }),
-    s.expect.to_equal({ expr: ref("first.emailed"), value: c.int(0) }),
+    s.expect.to_equal({ expr: ref("first.emailed"), value: c.int(1) }),
+
+    s.db.query({
+      table: alertLog,
+      where: expr(col("household_id"), "=", ref("house.id")),
+      as: "logged",
+    }),
+    s.expect.to_equal({ expr: withFilters(ref("logged"), fl.count()), value: c.int(1) }),
+    s.expect.to_equal({ expr: ref("logged.0.item_count"), value: c.int(1) }),
+    s.expect.to_equal({ expr: ref("logged.0.frequency"), value: c.text("daily") }),
 
     s.db.get({ table: item, fieldValue: ref("milk.id"), as: "milk_after" }),
     s.expect.to_be_true({ expr: ref("milk_after.expiring") }),
