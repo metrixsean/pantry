@@ -57,13 +57,14 @@ export const XANO_HOST: string =
 
 import type { InferResponse } from "@xano/sdk";
 import type { listItems, listLocations } from "../../../xano/api/items.js";
-import type { getHousehold } from "../../../xano/api/household.js";
+import type { getHousehold, listAlerts } from "../../../xano/api/household.js";
 import { ROUTES, routePath, type RouteInputs } from "../../../xano/routes.gen.js";
 
 export type Item = InferResponse<typeof listItems>[number];
 export type Location = InferResponse<typeof listLocations>[number];
 export type NewItem = RouteInputs["POST create_item"];
 export type Household = InferResponse<typeof getHousehold>;
+export type AlertLogEntry = InferResponse<typeof listAlerts>[number];
 
 // one shared kitchen until invite codes land
 export const HOUSEHOLD_ID = 1;
@@ -103,4 +104,8 @@ export function setAlertSettings(
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
+}
+
+export function getAlertHistory(): Promise<AlertLogEntry[]> {
+  return call(routePath("GET household/{household_id}/alerts", { household_id: HOUSEHOLD_ID }));
 }
