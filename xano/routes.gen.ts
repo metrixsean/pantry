@@ -82,9 +82,15 @@ function fillParams(
 }
 
 export const ROUTES = {
-  "GET household/{household_id}": { verb: "GET", path: "/api:household/household/{household_id}" },
-  "PATCH household/{household_id}": { verb: "PATCH", path: "/api:household/household/{household_id}" },
-  "GET household/{household_id}/alerts": { verb: "GET", path: "/api:household/household/{household_id}/alerts" },
+  "POST login": { verb: "POST", path: "/api:auth/login" },
+  "GET me": { verb: "GET", path: "/api:auth/me" },
+  "POST signup": { verb: "POST", path: "/api:auth/signup" },
+  "GET household": { verb: "GET", path: "/api:household/household" },
+  "PATCH household": { verb: "PATCH", path: "/api:household/household" },
+  "GET household/alerts": { verb: "GET", path: "/api:household/household/alerts" },
+  "POST household/join": { verb: "POST", path: "/api:household/household/join" },
+  "GET household/members": { verb: "GET", path: "/api:household/household/members" },
+  "POST household/start": { verb: "POST", path: "/api:household/household/start" },
   "POST create_item": { verb: "POST", path: "/api:items/create_item" },
   "GET list_items": { verb: "GET", path: "/api:items/list_items" },
   "GET list_locations": { verb: "GET", path: "/api:items/list_locations" },
@@ -101,9 +107,15 @@ type ManyRoutes<N> = [(N extends unknown ? (x: N) => void : never) extends (x: i
 
 /** A union of route names (e.g. a `key: RouteName` parameter): params checked at runtime. */
 export function routePath<N extends RouteName>(name: ManyRoutes<N>, params?: Record<string, string | number>): string;
-export function routePath(name: "GET household/{household_id}", params: { "household_id": string | number }): string;
-export function routePath(name: "PATCH household/{household_id}", params: { "household_id": string | number }): string;
-export function routePath(name: "GET household/{household_id}/alerts", params: { "household_id": string | number }): string;
+export function routePath(name: "POST login"): string;
+export function routePath(name: "GET me"): string;
+export function routePath(name: "POST signup"): string;
+export function routePath(name: "GET household"): string;
+export function routePath(name: "PATCH household"): string;
+export function routePath(name: "GET household/alerts"): string;
+export function routePath(name: "POST household/join"): string;
+export function routePath(name: "GET household/members"): string;
+export function routePath(name: "POST household/start"): string;
 export function routePath(name: "POST create_item"): string;
 export function routePath(name: "GET list_items"): string;
 export function routePath(name: "GET list_locations"): string;
@@ -128,16 +140,28 @@ export function routePath(name: RouteName, params?: Record<string, string | numb
  * the linked table's columns, which is what the server accepts.
  */
 export type RouteInputs = {
-  "GET household/{household_id}": {
-    household_id: number;
+  "POST login": {
+    email: string;
+    password: string;
   };
-  "PATCH household/{household_id}": {
-    household_id: number;
+  "GET me": {};
+  "POST signup": {
+    name: string;
+    email: string;
+    password: string;
+  };
+  "GET household": {};
+  "PATCH household": {
     alert_email?: string | null;
     alert_frequency?: "daily" | "weekly" | null;
   };
-  "GET household/{household_id}/alerts": {
-    household_id: number;
+  "GET household/alerts": {};
+  "POST household/join": {
+    invite_code: string;
+  };
+  "GET household/members": {};
+  "POST household/start": {
+    name: string;
   };
   "POST create_item": {
     name: string;

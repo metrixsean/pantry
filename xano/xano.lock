@@ -1,6 +1,11 @@
 {
   "version": 1,
   "objects": {
+    "app:auth": {
+      "guid": "4fe67f5a2d319eaaca7996700f27edd8",
+      "canonical": "auth",
+      "canonical_source": "code"
+    },
     "app:household": {
       "guid": "3290830a6c79e70f6d802bd23fa8835b",
       "canonical": "household",
@@ -23,20 +28,47 @@
     "dbo:location": {
       "guid": "26602b46980b3dc90d9f64fce2ced15e"
     },
+    "dbo:user": {
+      "guid": "efb558104909137dac95907814c26051"
+    },
     "function:check_expiring_items": {
       "guid": "10f2e242a7dcfb935155ad06a45d3d58"
     },
     "function:expiry_digest": {
       "guid": "7b59e4c43defade6f78d1a7ee4c7136f"
     },
-    "query:household|GET|household/{household_id}": {
+    "function:join_household": {
+      "guid": "0de2b6e6d80f71a0d7943cd147b003cd"
+    },
+    "function:start_household": {
+      "guid": "dba200af51f7c8dd2814e3947cf4fde3"
+    },
+    "query:auth|GET|me": {
+      "guid": "bfd70d24f92356209c72088852ec320e"
+    },
+    "query:auth|POST|login": {
+      "guid": "d39d74f907baeb484e9c93358362998a"
+    },
+    "query:auth|POST|signup": {
+      "guid": "89d6bc5d06c58cc80bb611a9fc64b12c"
+    },
+    "query:household|GET|household": {
       "guid": "77d46f3d3dfdfefd87cbaf0e8ce18039"
     },
-    "query:household|GET|household/{household_id}/alerts": {
+    "query:household|GET|household/alerts": {
       "guid": "e9ffa8cda11ef78afe1544b5f258a782"
     },
-    "query:household|PATCH|household/{household_id}": {
+    "query:household|GET|household/members": {
+      "guid": "35fc19e8cdc702ed21de0f6be72f0aee"
+    },
+    "query:household|PATCH|household": {
       "guid": "23ac8d729e65479bab64359351acd2b0"
+    },
+    "query:household|POST|household/join": {
+      "guid": "77a52eb14323768922c9d33b6baafcff"
+    },
+    "query:household|POST|household/start": {
+      "guid": "ed855e8cb46d76104ae84264ea5e6206"
     },
     "query:items|GET|list_items": {
       "guid": "0f060be10d636ba0280a1e68f8480d15"
@@ -52,6 +84,9 @@
     },
     "workflow_test:expiry check flags each item once": {
       "guid": "f60c9ff6b649bcf83e6df6840e53d00f"
+    },
+    "workflow_test:start a household then join it by invite code": {
+      "guid": "e33876d53113e991ba7ae78a35332c36"
     }
   }
 }
