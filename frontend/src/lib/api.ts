@@ -56,23 +56,84 @@ export const XANO_HOST: string =
   "";
 
 import type { InferResponse } from "@xano/sdk";
+import type { me } from "../../../xano/api/auth.js";
 import type { listItems, listLocations } from "../../../xano/api/items.js";
-import type { getHousehold, listAlerts } from "../../../xano/api/household.js";
+import type { getHousehold, listAlerts, listMembers } from "../../../xano/api/household.js";
 import { ROUTES, routePath, type RouteInputs } from "../../../xano/routes.gen.js";
 
+export type Me = InferResponse<typeof me>;
 export type Item = InferResponse<typeof listItems>[number];
 export type Location = InferResponse<typeof listLocations>[number];
 export type NewItem = RouteInputs["POST create_item"];
 export type Household = InferResponse<typeof getHousehold>;
+export type Member = InferResponse<typeof listMembers>[number];
 export type AlertLogEntry = InferResponse<typeof listAlerts>[number];
 
-// one shared kitchen until invite codes land
-export const HOUSEHOLD_ID = 1;
+const TOKEN_KEY = "pantry.token";
 
-async function call<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(XANO_HOST + url, init);
-  if (!res.ok) throw new Error(await res.text());
+export function getToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function signOut(): void {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
+async function call<T>(url: string, init: RequestInit = {}): Promise<T> {
+  const headers = new Headers(init.headers);
+  const token = getToken();
+  if (token) headers.set("authorization", `Bearer ${token}`);
+  if (init.body) headers.set("content-type", "application/json");
+  const res = await fetch(XANO_HOST + url, { ...init, headers });
+  if (!res.ok) {
+    const text = await res.text();
+    let message = text;
+    try {
+      message = JSON.parse(text).message || text;
+    } catch {}
+    throw new ApiError(res.status, message || res.statusText);
+  }
   return res.json();
+}
+
+async function authenticate(url: string, body: unknown): Promise<void> {
+  const { token } = await call<{ token: string }>(url, { method: "POST", body: JSON.stringify(body) });
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function signUp(body: RouteInputs["POST signup"]): Promise<void> {
+  return authenticate(routePath("POST signup"), body);
+}
+
+export function logIn(body: RouteInputs["POST login"]): Promise<void> {
+  return authenticate(routePath("POST login"), body);
+}
+
+export function getMe(): Promise<Me> {
+  return call(routePath("GET me"));
+}
+
+export function startHousehold(body: RouteInputs["POST household/start"]): Promise<Household> {
+  return call(routePath("POST household/start"), {
+    method: ROUTES["POST household/start"].verb,
+    body: JSON.stringify(body),
+  });
+}
+
+export function joinHousehold(body: RouteInputs["POST household/join"]): Promise<Household> {
+  return call(routePath("POST household/join"), {
+    method: ROUTES["POST household/join"].verb,
+    body: JSON.stringify(body),
+  });
 }
 
 export function getLocations(): Promise<Location[]> {
@@ -87,25 +148,25 @@ export function getItems(query: RouteInputs["GET list_items"] = {}): Promise<Ite
 export function addItem(body: NewItem): Promise<Item> {
   return call(routePath("POST create_item"), {
     method: ROUTES["POST create_item"].verb,
-    headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
 }
 
 export function getHouseholdSettings(): Promise<Household> {
-  return call(routePath("GET household/{household_id}", { household_id: HOUSEHOLD_ID }));
+  return call(routePath("GET household"));
 }
 
-export function setAlertSettings(
-  body: Omit<RouteInputs["PATCH household/{household_id}"], "household_id">,
-): Promise<Household> {
-  return call(routePath("PATCH household/{household_id}", { household_id: HOUSEHOLD_ID }), {
-    method: ROUTES["PATCH household/{household_id}"].verb,
-    headers: { "content-type": "application/json" },
+export function getMembers(): Promise<Member[]> {
+  return call(routePath("GET household/members"));
+}
+
+export function setAlertSettings(body: RouteInputs["PATCH household"]): Promise<Household> {
+  return call(routePath("PATCH household"), {
+    method: ROUTES["PATCH household"].verb,
     body: JSON.stringify(body),
   });
 }
 
 export function getAlertHistory(): Promise<AlertLogEntry[]> {
-  return call(routePath("GET household/{household_id}/alerts", { household_id: HOUSEHOLD_ID }));
+  return call(routePath("GET household/alerts"));
 }

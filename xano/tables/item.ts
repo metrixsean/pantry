@@ -1,5 +1,6 @@
 import { table, f } from "@xano/sdk";
 import { location } from "./location.js";
+import { user } from "./user.js";
 
 export const item = table({
   name: "item",
@@ -10,6 +11,7 @@ export const item = table({
     unit: f.text(),
     expires_on: f.date(),
     expiring: f.bool({ default: false }),
+    added_by: f.tableRef(user),
   },
   index: [
     { type: "btree", fields: [{ name: "location_id" }] },
