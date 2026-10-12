@@ -4,7 +4,21 @@ what's in the kitchen, where it lives, and when it goes off. a shared inventory 
 
 each item has a location (pantry, fridge, freezer), a quantity and unit, and an expiry date.
 the home page lists everything in stock, soonest to expire first, and lets you add more.
-not here yet: logins and invite codes, the shopping list.
+not here yet: the shopping list.
+
+## 🔑 accounts and households
+
+sign up on `/login` with a name, email and password, then `/join` asks whether you're starting a
+household or joining one. starting one gives you a pantry, fridge and freezer plus an 8 character
+invite code. everyone else signs up and types that code in (or opens the `/join?code=...` link from
+`/settings`, which fills it in for them). `/settings` also lists who's in.
+
+everything is scoped to your household: you only see your own locations, items and alert history, and
+the backend works that out from your login token, not from anything the page sends. the tokens last
+30 days and live in `localStorage`.
+
+a fresh deploy seeds a household called `home` with the invite code `home-sweet-home`, so you can
+sign up and join it straight away.
 
 ## 📧 expiry alerts
 
@@ -39,7 +53,7 @@ npm run dev           # run the frontend, already pointed at it
 
 No Xano account needed. The tables live in [`xano/tables/`](xano/tables/) and the endpoints in
 [`xano/api/`](xano/api/). Rerun `npm run xano:deploy` after each backend change. A fresh
-deploy seeds one household with pantry, fridge and freezer locations.
+deploy seeds one household (invite code `home-sweet-home`) with pantry, fridge and freezer locations.
 
 ## Run it on your machine
 
