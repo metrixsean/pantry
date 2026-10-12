@@ -3,13 +3,30 @@
   import ArrowLeft from "@lucide/svelte/icons/arrow-left";
   import History from "@lucide/svelte/icons/history";
   import Bell from "@lucide/svelte/icons/bell";
+  import Users from "@lucide/svelte/icons/users";
+  import LogOut from "@lucide/svelte/icons/log-out";
+  import { goto } from "$app/navigation";
 
   import * as Card from "$lib/components/ui/card/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import ModeToggle from "$lib/components/mode-toggle.svelte";
-  import { getAlertHistory, getHouseholdSettings, setAlertSettings, type AlertLogEntry, type Household } from "$lib/api";
+  import {
+    getAlertHistory,
+    getHouseholdSettings,
+    getMembers,
+    setAlertSettings,
+    signOut,
+    type AlertLogEntry,
+    type Household,
+    type Me,
+    type Member,
+  } from "$lib/api";
+  import { requireHousehold } from "$lib/session";
 
+  let me = $state<Me | null>(null);
   let house = $state<Household | undefined>();
+  let members = $state<Member[]>([]);
+  let inviteLink = $state("");
   let alertEmail = $state("");
   let frequency = $state<"daily" | "weekly">("daily");
   let history = $state<AlertLogEntry[]>([]);
@@ -21,10 +38,12 @@
 
   async function load() {
     try {
-      house = await getHouseholdSettings();
+      me = await requireHousehold();
+      if (!me) return;
+      [house, members, history] = await Promise.all([getHouseholdSettings(), getMembers(), getAlertHistory()]);
       alertEmail = house.alert_email ?? "";
       frequency = house.alert_frequency ?? "daily";
-      history = await getAlertHistory();
+      inviteLink = `${location.origin}/join?code=${encodeURIComponent(house.invite_code)}`;
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
     }
@@ -50,6 +69,11 @@
     }
   }
 
+  async function leave() {
+    signOut();
+    await goto("/login");
+  }
+
   const when = (ms: number) => new Date(ms).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 
   onMount(load);
@@ -63,7 +87,12 @@
       </Button>
       <h1 class="text-3xl font-semibold tracking-tight">settings</h1>
     </div>
-    <ModeToggle />
+    <div class="flex items-center gap-1">
+      <Button variant="ghost" size="icon" onclick={leave} aria-label="Log out">
+        <LogOut />
+      </Button>
+      <ModeToggle />
+    </div>
   </div>
 
   {#if error}
@@ -75,8 +104,23 @@
       <Card.Title>{house?.name ?? "household"}</Card.Title>
       <Card.Description>
         invite code: <span class="text-foreground font-mono">{house?.invite_code ?? "…"}</span>
+        {#if inviteLink}
+          <br />or send them <a class="text-foreground underline underline-offset-4" href={inviteLink}>{inviteLink}</a>
+        {/if}
       </Card.Description>
     </Card.Header>
+    <Card.Content>
+      <p class="mb-2 flex items-center gap-2 text-sm font-medium"><Users class="size-4" /> who's in</p>
+      <ul class="divide-border divide-y text-sm">
+        {#each members as member (member.id)}
+          <li class="flex items-baseline justify-between gap-4 py-2">
+            <span>{member.name}{member.id === me?.id ? " (you)" : ""}</span>
+            <span class="text-muted-foreground">{member.email}</span>
+          </li>
+        {/each}
+      </ul>
+      <Button class="mt-2 px-0" variant="link" href="/join">switch household</Button>
+    </Card.Content>
   </Card.Root>
 
   <Card.Root>
