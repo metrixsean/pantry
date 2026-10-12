@@ -6,6 +6,7 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import ModeToggle from "$lib/components/mode-toggle.svelte";
   import { addItem, getItems, getLocations, type Item, type Location } from "$lib/api";
+  import { requireHousehold } from "$lib/session";
 
   let locations = $state<Location[]>([]);
   let items = $state<Item[]>([]);
@@ -69,7 +70,13 @@
     }
   }
 
-  onMount(load);
+  onMount(async () => {
+    try {
+      if (await requireHousehold()) await load();
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    }
+  });
 </script>
 
 <main class="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 p-8">
