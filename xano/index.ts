@@ -16,15 +16,18 @@ import {
   listMembers,
   listAlerts,
 } from "./api/household.js";
+import { shoppingApi, listShopping, addShopping, updateShopping, restockShopping } from "./api/shopping.js";
 import { expiryDigest, checkExpiringItems } from "./functions/expiry.js";
 import { startHousehold, joinHousehold } from "./functions/household.js";
+import { restockEntry } from "./functions/shopping.js";
 import { nightlyExpiryCheck } from "./tasks/nightly-expiry.js";
 import { expiryCheckFlagsOnce } from "./tests/expiry.js";
 import { startThenJoinHousehold } from "./tests/household.js";
+import { restockTopsUpOrAdds } from "./tests/shopping.js";
 
 export default workspace("pantry")
   .registerTables([household, user, location, item, alertLog, shoppingEntry])
-  .registerApiGroups([authApi, itemsApi, householdApi])
+  .registerApiGroups([authApi, itemsApi, householdApi, shoppingApi])
   .registerQueries([
     signup,
     login,
@@ -38,7 +41,11 @@ export default workspace("pantry")
     updateHousehold,
     listMembers,
     listAlerts,
+    listShopping,
+    addShopping,
+    updateShopping,
+    restockShopping,
   ])
-  .registerFunctions([expiryDigest, checkExpiringItems, startHousehold, joinHousehold])
+  .registerFunctions([expiryDigest, checkExpiringItems, startHousehold, joinHousehold, restockEntry])
   .registerTasks([nightlyExpiryCheck])
-  .registerWorkflowTests([expiryCheckFlagsOnce, startThenJoinHousehold]);
+  .registerWorkflowTests([expiryCheckFlagsOnce, startThenJoinHousehold, restockTopsUpOrAdds]);

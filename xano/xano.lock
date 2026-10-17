@@ -16,6 +16,11 @@
       "canonical": "items",
       "canonical_source": "code"
     },
+    "app:shopping": {
+      "guid": "69ec510574295085b99490571f95f2ac",
+      "canonical": "shopping",
+      "canonical_source": "code"
+    },
     "dbo:alert_log": {
       "guid": "33e292b659033c99d44a85ecd7229964"
     },
@@ -42,6 +47,9 @@
     },
     "function:join_household": {
       "guid": "0de2b6e6d80f71a0d7943cd147b003cd"
+    },
+    "function:restock_entry": {
+      "guid": "7cd7c7f037eff992860ff721da4f85c5"
     },
     "function:start_household": {
       "guid": "dba200af51f7c8dd2814e3947cf4fde3"
@@ -82,11 +90,26 @@
     "query:items|POST|create_item": {
       "guid": "d0ce2cce820ad86fb4ca2f07d65105a3"
     },
+    "query:shopping|GET|shopping": {
+      "guid": "93e94a3abe780436199f85b139947680"
+    },
+    "query:shopping|PATCH|shopping/{id}": {
+      "guid": "a91de9fa10dca8a1def5378d6e922c51"
+    },
+    "query:shopping|POST|shopping": {
+      "guid": "1f4ccd3a2f6edb168c39f145556ef2d8"
+    },
+    "query:shopping|POST|shopping/{id}/restock": {
+      "guid": "a4ce6f32742bded6f97ed278bb774687"
+    },
     "task:nightly_expiry_check": {
       "guid": "1b962a8e850511d9198f7fa253297935"
     },
     "workflow_test:expiry check flags each item once": {
       "guid": "f60c9ff6b649bcf83e6df6840e53d00f"
+    },
+    "workflow_test:restock tops up an existing item or adds a new one": {
+      "guid": "391313fedc7bb9709bce3e68ff394e17"
     },
     "workflow_test:start a household then join it by invite code": {
       "guid": "e33876d53113e991ba7ae78a35332c36"

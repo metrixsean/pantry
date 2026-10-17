@@ -94,6 +94,10 @@ export const ROUTES = {
   "POST create_item": { verb: "POST", path: "/api:items/create_item" },
   "GET list_items": { verb: "GET", path: "/api:items/list_items" },
   "GET list_locations": { verb: "GET", path: "/api:items/list_locations" },
+  "GET shopping": { verb: "GET", path: "/api:shopping/shopping" },
+  "POST shopping": { verb: "POST", path: "/api:shopping/shopping" },
+  "PATCH shopping/{id}": { verb: "PATCH", path: "/api:shopping/shopping/{id}" },
+  "POST shopping/{id}/restock": { verb: "POST", path: "/api:shopping/shopping/{id}/restock" },
 } as const;
 
 /**
@@ -119,6 +123,10 @@ export function routePath(name: "POST household/start"): string;
 export function routePath(name: "POST create_item"): string;
 export function routePath(name: "GET list_items"): string;
 export function routePath(name: "GET list_locations"): string;
+export function routePath(name: "GET shopping"): string;
+export function routePath(name: "POST shopping"): string;
+export function routePath(name: "PATCH shopping/{id}", params: { "id": string | number }): string;
+export function routePath(name: "POST shopping/{id}/restock", params: { "id": string | number }): string;
 
 export function routePath(name: RouteName, params?: Record<string, string | number>): string {
   // Read through a widened view: a workspace with no endpoints at all makes
@@ -174,6 +182,24 @@ export type RouteInputs = {
     location_id?: number;
   };
   "GET list_locations": {};
+  "GET shopping": {};
+  "POST shopping": {
+    name: string;
+    quantity?: number | null;
+  };
+  "PATCH shopping/{id}": {
+    id: number;
+    name?: string | null;
+    quantity?: number | null;
+    done?: boolean | null;
+  };
+  "POST shopping/{id}/restock": {
+    id: number;
+    location_id: number;
+    expires_on?: string | null;
+    quantity?: number | null;
+    unit?: string | null;
+  };
 };
 
 /** The path params of every realtime channel, keyed exactly like CHANNELS. */
