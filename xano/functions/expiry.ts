@@ -19,6 +19,7 @@ import { household } from "../tables/household.js";
 import { location } from "../tables/location.js";
 import { item } from "../tables/item.js";
 import { alertLog } from "../tables/alert_log.js";
+import { shoppingEntry } from "../tables/shopping_entry.js";
 
 export const EXPIRY_WINDOW_DAYS = 3;
 export const WEEKLY_WINDOW_DAYS = 7;
@@ -129,7 +130,7 @@ export const expiryDigest = defineFunction({
 export const checkExpiringItems = defineFunction({
   name: "check_expiring_items",
   description:
-    "Flags stocked items expiring within the window, clears the flag on ones that moved out of it, and emails each household by its alert_frequency: newly flagged items nightly, or the coming week's items on mondays.",
+    "Flags stocked items expiring within the window, clears the flag on ones that moved out of it, adds empty items to the shopping list unless they're already on it, and emails each household by its alert_frequency: newly flagged items nightly, or the coming week's items on mondays.",
   stack: [
     s.set_var(
       "cutoff",
@@ -168,6 +169,37 @@ export const checkExpiringItems = defineFunction({
       list: ref("stale"),
       as: "row",
       body: [s.db.edit({ table: item, fieldValue: ref("row.id"), row: { expiring: false } })],
+    }),
+    s.db.query({
+      table: item,
+      bind: [{ table: location, as: "loc", where: expr(col("location_id"), "=", col("loc.id")) }],
+      where: [expr(col("quantity"), "<=", c.decimal(0))],
+      eval: [{ name: "loc.household_id", as: "household_id" }],
+      as: "empty",
+    }),
+    s.set_var("listed", c.int(0)),
+    s.foreach({
+      list: ref("empty"),
+      as: "row",
+      body: [
+        s.db.query({
+          table: shoppingEntry,
+          where: [
+            expr(col("household_id"), "=", ref("row.household_id")),
+            expr(col("name"), "=", ref("row.name")),
+            expr(col("done"), "=", c.bool(false)),
+          ],
+          returnType: "exists",
+          as: "on_list",
+        }),
+        s.conditional({
+          when: expr(ref("on_list"), "=", c.bool(false)),
+          then: [
+            s.db.add({ table: shoppingEntry, row: { name: ref("row.name"), household_id: ref("row.household_id") } }),
+            s.update_var("listed", withFilters(ref("listed"), fl.add(1))),
+          ],
+        }),
+      ],
     }),
     s.set_var("by_household", withFilters(ref("fresh"), fl.index_by("household_id"))),
     s.set_var("week_by_household", c.obj({})),
@@ -248,5 +280,6 @@ export const checkExpiringItems = defineFunction({
     flagged: withFilters(ref("fresh"), fl.count()),
     cleared: withFilters(ref("stale"), fl.count()),
     emailed: ref("emailed"),
+    listed: ref("listed"),
   },
 });

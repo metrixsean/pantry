@@ -28,6 +28,9 @@
     "dbo:location": {
       "guid": "26602b46980b3dc90d9f64fce2ced15e"
     },
+    "dbo:shopping_entry": {
+      "guid": "5c3b59121c129e606a512d4355916b90"
+    },
     "dbo:user": {
       "guid": "efb558104909137dac95907814c26051"
     },
