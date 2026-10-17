@@ -4,7 +4,7 @@ what's in the kitchen, where it lives, and when it goes off. a shared inventory 
 
 each item has a location (pantry, fridge, freezer), a quantity and unit, and an expiry date.
 the home page lists everything in stock, soonest to expire first, and lets you add more.
-not here yet: the shopping list.
+not here yet: the shopping list page (the backend for it is done, see below).
 
 ## 🔑 accounts and households
 
@@ -19,6 +19,14 @@ the backend works that out from your login token, not from anything the page sen
 
 a fresh deploy seeds a household called `home` with the invite code `home-sweet-home`, so you can
 sign up and join it straight away.
+
+## 🛒 shopping list
+
+the household shares one list. `GET /shopping` returns it (open stuff first), `POST /shopping` adds
+something, and `PATCH /shopping/{id}` renames it, changes the quantity or ticks it off. bought it?
+`POST /shopping/{id}/restock` with a location and a new expiry date ticks it off and puts it back in
+stock: an item with the same name in that location gets topped up, otherwise a new one is added.
+anything that hits zero lands on the list by itself overnight.
 
 ## 📧 expiry alerts
 
