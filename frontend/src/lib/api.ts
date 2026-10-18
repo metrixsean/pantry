@@ -59,6 +59,7 @@ import type { InferResponse } from "@xano/sdk";
 import type { me } from "../../../xano/api/auth.js";
 import type { listItems, listLocations } from "../../../xano/api/items.js";
 import type { getHousehold, listAlerts, listMembers } from "../../../xano/api/household.js";
+import type { listShopping } from "../../../xano/api/shopping.js";
 import { ROUTES, routePath, type RouteInputs } from "../../../xano/routes.gen.js";
 
 export type Me = InferResponse<typeof me>;
@@ -68,6 +69,8 @@ export type NewItem = RouteInputs["POST create_item"];
 export type Household = InferResponse<typeof getHousehold>;
 export type Member = InferResponse<typeof listMembers>[number];
 export type AlertLogEntry = InferResponse<typeof listAlerts>[number];
+
+export type ShoppingEntry = InferResponse<typeof listShopping>[number];
 
 const TOKEN_KEY = "pantry.token";
 
@@ -169,4 +172,19 @@ export function setAlertSettings(body: RouteInputs["PATCH household"]): Promise<
 
 export function getAlertHistory(): Promise<AlertLogEntry[]> {
   return call(routePath("GET household/alerts"));
+}
+
+export function getShopping(): Promise<ShoppingEntry[]> {
+  return call(routePath("GET shopping"));
+}
+
+export function addShopping(body: RouteInputs["POST shopping"]): Promise<ShoppingEntry> {
+  return call(routePath("POST shopping"), { method: ROUTES["POST shopping"].verb, body: JSON.stringify(body) });
+}
+
+export function restock({ id, ...body }: RouteInputs["POST shopping/{id}/restock"]): Promise<Item> {
+  return call(routePath("POST shopping/{id}/restock", { id }), {
+    method: ROUTES["POST shopping/{id}/restock"].verb,
+    body: JSON.stringify(body),
+  });
 }
