@@ -1,4 +1,4 @@
-import { apiGroup, query, input, s, inp, ref, auth, col, cmp, expr, guard } from "@xano/sdk";
+import { apiGroup, query, input, s, fl, inp, ref, auth, col, cmp, expr, guard, statements, withFilters } from "@xano/sdk";
 import { item } from "../tables/item.js";
 import { location } from "../tables/location.js";
 import { user } from "../tables/user.js";
@@ -79,4 +79,64 @@ export const listLocations = query({
     }),
   ],
   response: ref("rows"),
+});
+
+const ownLocation = (id: Parameters<typeof s.db.get>[0]["fieldValue"], as: string) =>
+  statements(
+    s.db.get({ table: location, fieldValue: id, as }),
+    guard.found(as, { message: "no such location" }),
+    guard.require(expr(ref(`${as}.household_id`), "=", ref("me.household_id")), {
+      errorType: "notfound",
+      message: "no such location",
+    }),
+  );
+
+const ownItem = () =>
+  statements(
+    s.db.get({ table: item, fieldValue: inp("id"), as: "row" }),
+    guard.found("row", { message: "no such item" }),
+    ...ownLocation(ref("row.location_id"), "row_loc"),
+  );
+
+export const updateItem = query({
+  name: "items/{id}",
+  verb: "PATCH",
+  apiGroup: itemsApi,
+  auth: user,
+  input: {
+    id: input.int({ required: true }),
+    name: input.text({ nullable: true, methods: ["trim"] }),
+    location_id: input.int({ nullable: true }),
+    quantity: input.decimal({ nullable: true }),
+    unit: input.text({ nullable: true }),
+    expires_on: input.date({ nullable: true }),
+  },
+  stack: [
+    ...callerHousehold(),
+    ...ownItem(),
+    ...ownLocation(withFilters(inp("location_id"), fl.first_notnull(ref("row.location_id"))), "loc"),
+    s.db.edit({
+      table: item,
+      fieldValue: inp("id"),
+      row: {
+        name: withFilters(inp("name"), fl.first_notnull(ref("row.name"))),
+        location_id: ref("loc.id"),
+        quantity: withFilters(inp("quantity"), fl.first_notnull(ref("row.quantity"))),
+        unit: withFilters(inp("unit"), fl.first_notnull(ref("row.unit"))),
+        expires_on: withFilters(inp("expires_on"), fl.first_notnull(ref("row.expires_on"))),
+      },
+      as: "updated",
+    }),
+  ],
+  response: ref("updated"),
+});
+
+export const deleteItem = query({
+  name: "items/{id}",
+  verb: "DELETE",
+  apiGroup: itemsApi,
+  auth: user,
+  input: { id: input.int({ required: true }) },
+  stack: [...callerHousehold(), ...ownItem(), s.db.del({ table: item, fieldValue: inp("id") })],
+  response: ref("row"),
 });

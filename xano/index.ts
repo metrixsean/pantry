@@ -6,7 +6,7 @@ import { item } from "./tables/item.js";
 import { alertLog } from "./tables/alert_log.js";
 import { shoppingEntry } from "./tables/shopping_entry.js";
 import { authApi, signup, login, me } from "./api/auth.js";
-import { itemsApi, listItems, createItem, listLocations } from "./api/items.js";
+import { itemsApi, listItems, createItem, updateItem, deleteItem, listLocations } from "./api/items.js";
 import {
   householdApi,
   createHousehold,
@@ -34,6 +34,8 @@ export default workspace("pantry")
     me,
     listItems,
     createItem,
+    updateItem,
+    deleteItem,
     listLocations,
     createHousehold,
     joinByInvite,

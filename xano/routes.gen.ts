@@ -92,6 +92,8 @@ export const ROUTES = {
   "GET household/members": { verb: "GET", path: "/api:household/household/members" },
   "POST household/start": { verb: "POST", path: "/api:household/household/start" },
   "POST create_item": { verb: "POST", path: "/api:items/create_item" },
+  "DELETE items/{id}": { verb: "DELETE", path: "/api:items/items/{id}" },
+  "PATCH items/{id}": { verb: "PATCH", path: "/api:items/items/{id}" },
   "GET list_items": { verb: "GET", path: "/api:items/list_items" },
   "GET list_locations": { verb: "GET", path: "/api:items/list_locations" },
   "GET shopping": { verb: "GET", path: "/api:shopping/shopping" },
@@ -121,6 +123,8 @@ export function routePath(name: "POST household/join"): string;
 export function routePath(name: "GET household/members"): string;
 export function routePath(name: "POST household/start"): string;
 export function routePath(name: "POST create_item"): string;
+export function routePath(name: "DELETE items/{id}", params: { "id": string | number }): string;
+export function routePath(name: "PATCH items/{id}", params: { "id": string | number }): string;
 export function routePath(name: "GET list_items"): string;
 export function routePath(name: "GET list_locations"): string;
 export function routePath(name: "GET shopping"): string;
@@ -176,6 +180,17 @@ export type RouteInputs = {
     location_id: number;
     quantity: number;
     unit?: string;
+    expires_on?: string | null;
+  };
+  "DELETE items/{id}": {
+    id: number;
+  };
+  "PATCH items/{id}": {
+    id: number;
+    name?: string | null;
+    location_id?: number | null;
+    quantity?: number | null;
+    unit?: string | null;
     expires_on?: string | null;
   };
   "GET list_items": {
