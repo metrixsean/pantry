@@ -81,11 +81,17 @@
     "query:household|POST|household/start": {
       "guid": "ed855e8cb46d76104ae84264ea5e6206"
     },
+    "query:items|DELETE|items/{id}": {
+      "guid": "61007b1da05889541d6e6e6b9bdcd82a"
+    },
     "query:items|GET|list_items": {
       "guid": "0f060be10d636ba0280a1e68f8480d15"
     },
     "query:items|GET|list_locations": {
       "guid": "53137aaf076df64e77ee4bab3d39e6b3"
+    },
+    "query:items|PATCH|items/{id}": {
+      "guid": "3bf8def3930ed38d499f5ffc11f3a229"
     },
     "query:items|POST|create_item": {
       "guid": "d0ce2cce820ad86fb4ca2f07d65105a3"
