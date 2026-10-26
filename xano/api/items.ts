@@ -1,4 +1,4 @@
-import { apiGroup, query, input, s, fl, inp, ref, auth, col, cmp, expr, guard, statements, withFilters } from "@xano/sdk";
+import { apiGroup, query, c, input, s, fl, inp, ref, auth, col, cmp, expr, guard, statements, withFilters } from "@xano/sdk";
 import { item } from "../tables/item.js";
 import { location } from "../tables/location.js";
 import { user } from "../tables/user.js";
@@ -11,15 +11,30 @@ export const listItems = query({
   verb: "GET",
   apiGroup: itemsApi,
   auth: user,
-  input: { location_id: input.int() },
+  input: { location_id: input.int(), expiring_within: input.int() },
   stack: [
     ...callerHousehold(),
+    s.set_var("cutoff", c.null()),
+    s.conditional({
+      when: expr(inp("expiring_within"), "!=", c.null()),
+      then: [
+        s.update_var(
+          "cutoff",
+          withFilters(
+            c.now(),
+            fl.epochms_add_secs(withFilters(inp("expiring_within"), fl.mul(86400))),
+            fl.epochms_date("Y-m-d", "UTC"),
+          ),
+        ),
+      ],
+    }),
     s.db.query({
       table: item,
       bind: [{ table: location, as: "loc", where: expr(col("location_id"), "=", col("loc.id")) }],
       where: [
         expr(col("loc.household_id"), "=", ref("me.household_id")),
         cmp(col("location_id"), "=", inp("location_id"), { ignoreEmpty: true }),
+        cmp(col("expires_on"), "<=", ref("cutoff"), { ignoreEmpty: true }),
       ],
       sort: [{ sortBy: "expires_on", dir: "asc" }],
       as: "rows",

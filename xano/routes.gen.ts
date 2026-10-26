@@ -195,6 +195,7 @@ export type RouteInputs = {
   };
   "GET list_items": {
     location_id?: number;
+    expiring_within?: number;
   };
   "GET list_locations": {};
   "GET shopping": {};
