@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Settings from "@lucide/svelte/icons/settings";
+  import ShoppingCart from "@lucide/svelte/icons/shopping-cart";
 
   import * as Card from "$lib/components/ui/card/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
@@ -83,6 +84,9 @@
   <div class="flex items-center justify-between">
     <h1 class="text-3xl font-semibold tracking-tight">pantry</h1>
     <div class="flex items-center gap-1">
+      <Button variant="ghost" size="icon" href="/shopping" aria-label="Shopping list">
+        <ShoppingCart />
+      </Button>
       <Button variant="ghost" size="icon" href="/settings" aria-label="Settings">
         <Settings />
       </Button>
@@ -96,7 +100,8 @@
 
   <div class="grid grid-cols-3 gap-3">
     {#each locations as loc (loc.id)}
-      <Card.Root>
+      <a href="/locations/{loc.id}" class="rounded-xl">
+        <Card.Root class="hover:bg-accent h-full transition-colors">
         <Card.Content class="pt-6">
           <div class="flex flex-col gap-2">
             <p class="font-semibold text-sm">{loc.name}</p>
@@ -107,6 +112,7 @@
           </div>
         </Card.Content>
       </Card.Root>
+      </a>
     {/each}
   </div>
 
