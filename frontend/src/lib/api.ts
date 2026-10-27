@@ -51,9 +51,7 @@ declare global {
  * Empty string when neither is set (the UI runs with no backend).
  */
 export const XANO_HOST: string =
-  (typeof window !== "undefined" && window.XANO_HOST) ||
-  import.meta.env.VITE_XANO_HOST ||
-  "";
+  (typeof window !== "undefined" && window.XANO_HOST) || import.meta.env.VITE_XANO_HOST || "";
 
 import type { InferResponse } from "@xano/sdk";
 import type { me } from "../../../xano/api/auth.js";
@@ -109,7 +107,10 @@ async function call<T>(url: string, init: RequestInit = {}): Promise<T> {
 }
 
 async function authenticate(url: string, body: unknown): Promise<void> {
-  const { token } = await call<{ token: string }>(url, { method: "POST", body: JSON.stringify(body) });
+  const { token } = await call<{ token: string }>(url, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
   localStorage.setItem(TOKEN_KEY, token);
 }
 
@@ -144,8 +145,23 @@ export function getLocations(): Promise<Location[]> {
 }
 
 export function getItems(query: RouteInputs["GET list_items"] = {}): Promise<Item[]> {
-  const qs = query.location_id === undefined ? "" : `?location_id=${query.location_id}`;
-  return call(routePath("GET list_items") + qs);
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) if (value != null) params.set(key, String(value));
+  const qs = params.toString();
+  return call(routePath("GET list_items") + (qs ? `?${qs}` : ""));
+}
+
+export function updateItem({ id, ...body }: RouteInputs["PATCH items/{id}"]): Promise<Item> {
+  return call(routePath("PATCH items/{id}", { id }), {
+    method: ROUTES["PATCH items/{id}"].verb,
+    body: JSON.stringify(body),
+  });
+}
+
+export function deleteItem(id: number): Promise<Item> {
+  return call(routePath("DELETE items/{id}", { id }), {
+    method: ROUTES["DELETE items/{id}"].verb,
+  });
 }
 
 export function addItem(body: NewItem): Promise<Item> {
@@ -179,7 +195,10 @@ export function getShopping(): Promise<ShoppingEntry[]> {
 }
 
 export function addShopping(body: RouteInputs["POST shopping"]): Promise<ShoppingEntry> {
-  return call(routePath("POST shopping"), { method: ROUTES["POST shopping"].verb, body: JSON.stringify(body) });
+  return call(routePath("POST shopping"), {
+    method: ROUTES["POST shopping"].verb,
+    body: JSON.stringify(body),
+  });
 }
 
 export function restock({ id, ...body }: RouteInputs["POST shopping/{id}/restock"]): Promise<Item> {
