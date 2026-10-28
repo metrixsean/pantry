@@ -3,6 +3,7 @@ import { household } from "../tables/household.js";
 import { location } from "../tables/location.js";
 import { item } from "../tables/item.js";
 import { alertLog } from "../tables/alert_log.js";
+import { shoppingEntry } from "../tables/shopping_entry.js";
 import { checkExpiringItems } from "../functions/expiry.js";
 
 const daysFromNow = (days: number) =>
@@ -64,5 +65,42 @@ export const expiryCheckFlagsOnce = workflowTest({
 
     s.function.call({ fn: checkExpiringItems, as: "second" }),
     s.expect.to_equal({ expr: ref("second.flagged"), value: c.int(0) }),
+  ],
+});
+
+const listedAs = (name: string, as: string) =>
+  s.db.query({
+    table: shoppingEntry,
+    where: [
+      expr(col("household_id"), "=", ref("house.id")),
+      expr(col("name"), "=", c.text(name)),
+      expr(col("done"), "=", c.bool(false)),
+    ],
+    as,
+  });
+
+export const emptyItemsListedOnce = workflowTest({
+  name: "empty items land on the shopping list once",
+  stack: [
+    s.db.add({ table: household, row: { name: "empty house", invite_code: "wf-empty" }, as: "house" }),
+    s.db.add({ table: location, row: { name: "pantry", household_id: ref("house.id") }, as: "pantry" }),
+    s.db.add({ table: item, row: { name: "flour", location_id: ref("pantry.id"), quantity: 0 } }),
+    s.db.add({ table: item, row: { name: "sugar", location_id: ref("pantry.id"), quantity: 0 } }),
+    s.db.add({ table: item, row: { name: "eggs", location_id: ref("pantry.id"), quantity: 0 } }),
+    s.db.add({ table: item, row: { name: "rice", location_id: ref("pantry.id"), quantity: 3 } }),
+    s.db.add({ table: shoppingEntry, row: { name: "sugar", household_id: ref("house.id") } }),
+    s.db.add({ table: shoppingEntry, row: { name: "eggs", household_id: ref("house.id"), done: true } }),
+
+    s.function.call({ fn: checkExpiringItems, as: "first" }),
+    s.function.call({ fn: checkExpiringItems, as: "second" }),
+
+    listedAs("flour", "flour"),
+    s.expect.to_equal({ expr: withFilters(ref("flour"), fl.count()), value: c.int(1) }),
+    listedAs("sugar", "sugar"),
+    s.expect.to_equal({ expr: withFilters(ref("sugar"), fl.count()), value: c.int(1) }),
+    listedAs("eggs", "eggs"),
+    s.expect.to_equal({ expr: withFilters(ref("eggs"), fl.count()), value: c.int(1) }),
+    listedAs("rice", "rice"),
+    s.expect.to_equal({ expr: withFilters(ref("rice"), fl.count()), value: c.int(0) }),
   ],
 });

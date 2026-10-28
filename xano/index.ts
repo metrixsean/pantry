@@ -21,7 +21,7 @@ import { expiryDigest, checkExpiringItems } from "./functions/expiry.js";
 import { startHousehold, joinHousehold } from "./functions/household.js";
 import { restockEntry } from "./functions/shopping.js";
 import { nightlyExpiryCheck } from "./tasks/nightly-expiry.js";
-import { expiryCheckFlagsOnce } from "./tests/expiry.js";
+import { expiryCheckFlagsOnce, emptyItemsListedOnce } from "./tests/expiry.js";
 import { startThenJoinHousehold } from "./tests/household.js";
 import { restockTopsUpOrAdds } from "./tests/shopping.js";
 
@@ -50,4 +50,4 @@ export default workspace("pantry")
   ])
   .registerFunctions([expiryDigest, checkExpiringItems, startHousehold, joinHousehold, restockEntry])
   .registerTasks([nightlyExpiryCheck])
-  .registerWorkflowTests([expiryCheckFlagsOnce, startThenJoinHousehold, restockTopsUpOrAdds]);
+  .registerWorkflowTests([expiryCheckFlagsOnce, emptyItemsListedOnce, startThenJoinHousehold, restockTopsUpOrAdds]);
