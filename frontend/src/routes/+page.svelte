@@ -11,6 +11,7 @@
 
   let locations = $state<Location[]>([]);
   let items = $state<Item[]>([]);
+  let expiring = $state<Item[]>([]);
   let error = $state("");
 
   let name = $state("");
@@ -25,18 +26,8 @@
     return locations.find((l) => l.id === id)?.name ?? "?";
   }
 
-  function isExpiringSoon(expiresOn: string | null): boolean {
-    if (!expiresOn) return false;
-    const expDate = new Date(expiresOn);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const threeDaysAhead = new Date(today);
-    threeDaysAhead.setDate(threeDaysAhead.getDate() + 3);
-    return expDate <= threeDaysAhead && expDate >= today;
-  }
-
   function getExpiringCountForLocation(locationId: number): number {
-    return items.filter((item) => item.location_id === locationId && isExpiringSoon(item.expires_on)).length;
+    return expiring.filter((item) => item.location_id === locationId).length;
   }
 
   function getTotalCountForLocation(locationId: number): number {
@@ -45,7 +36,11 @@
 
   async function load() {
     try {
-      [locations, items] = await Promise.all([getLocations(), getItems()]);
+      [locations, items, expiring] = await Promise.all([
+        getLocations(),
+        getItems(),
+        getItems({ expiring_within: 3 }),
+      ]);
       locationId ??= locations[0]?.id;
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
