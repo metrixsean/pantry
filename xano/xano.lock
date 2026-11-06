@@ -84,6 +84,9 @@
     "query:items|DELETE|items/{id}": {
       "guid": "61007b1da05889541d6e6e6b9bdcd82a"
     },
+    "query:items|DELETE|locations/{id}": {
+      "guid": "944ef3def0c76719c9a569171c536cd8"
+    },
     "query:items|GET|list_items": {
       "guid": "0f060be10d636ba0280a1e68f8480d15"
     },
@@ -92,6 +95,9 @@
     },
     "query:items|PATCH|items/{id}": {
       "guid": "3bf8def3930ed38d499f5ffc11f3a229"
+    },
+    "query:items|PATCH|locations/{id}": {
+      "guid": "9b2cbd920648026f01c8d36dd2ae4e9c"
     },
     "query:items|POST|create_item": {
       "guid": "d0ce2cce820ad86fb4ca2f07d65105a3"
