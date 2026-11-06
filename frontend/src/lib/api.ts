@@ -14,8 +14,7 @@
 //     schemas under the same keys.
 //   • Response types: `import type` the def. InferResponse erases to nothing.
 //
-// Nothing here imports the manifest yet — an add-on's endpoints may already be
-// in it. Wire an endpoint (one in xano/, or an add-on's) like:
+// Wire a new endpoint (one in xano/, or an add-on's) like:
 //
 //   import type { InferResponse } from "@xano/sdk";
 //   import type { createNoteQuery } from "../../../xano/api/create-note.js";
@@ -149,6 +148,19 @@ export function getItems(query: RouteInputs["GET list_items"] = {}): Promise<Ite
   for (const [key, value] of Object.entries(query)) if (value != null) params.set(key, String(value));
   const qs = params.toString();
   return call(routePath("GET list_items") + (qs ? `?${qs}` : ""));
+}
+
+export function renameLocation({ id, ...body }: RouteInputs["PATCH locations/{id}"]): Promise<Location> {
+  return call(routePath("PATCH locations/{id}", { id }), {
+    method: ROUTES["PATCH locations/{id}"].verb,
+    body: JSON.stringify(body),
+  });
+}
+
+export function deleteLocation(id: number): Promise<Location> {
+  return call(routePath("DELETE locations/{id}", { id }), {
+    method: ROUTES["DELETE locations/{id}"].verb,
+  });
 }
 
 export function updateItem({ id, ...body }: RouteInputs["PATCH items/{id}"]): Promise<Item> {
