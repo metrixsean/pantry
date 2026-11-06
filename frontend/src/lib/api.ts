@@ -207,3 +207,10 @@ export function restock({ id, ...body }: RouteInputs["POST shopping/{id}/restock
     body: JSON.stringify(body),
   });
 }
+
+export function updateShopping({ id, ...body }: RouteInputs["PATCH shopping/{id}"]): Promise<ShoppingEntry> {
+  return call(routePath("PATCH shopping/{id}", { id }), {
+    method: ROUTES["PATCH shopping/{id}"].verb,
+    body: JSON.stringify(body),
+  });
+}
