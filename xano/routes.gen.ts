@@ -96,6 +96,8 @@ export const ROUTES = {
   "PATCH items/{id}": { verb: "PATCH", path: "/api:items/items/{id}" },
   "GET list_items": { verb: "GET", path: "/api:items/list_items" },
   "GET list_locations": { verb: "GET", path: "/api:items/list_locations" },
+  "DELETE locations/{id}": { verb: "DELETE", path: "/api:items/locations/{id}" },
+  "PATCH locations/{id}": { verb: "PATCH", path: "/api:items/locations/{id}" },
   "GET shopping": { verb: "GET", path: "/api:shopping/shopping" },
   "POST shopping": { verb: "POST", path: "/api:shopping/shopping" },
   "PATCH shopping/{id}": { verb: "PATCH", path: "/api:shopping/shopping/{id}" },
@@ -127,6 +129,8 @@ export function routePath(name: "DELETE items/{id}", params: { "id": string | nu
 export function routePath(name: "PATCH items/{id}", params: { "id": string | number }): string;
 export function routePath(name: "GET list_items"): string;
 export function routePath(name: "GET list_locations"): string;
+export function routePath(name: "DELETE locations/{id}", params: { "id": string | number }): string;
+export function routePath(name: "PATCH locations/{id}", params: { "id": string | number }): string;
 export function routePath(name: "GET shopping"): string;
 export function routePath(name: "POST shopping"): string;
 export function routePath(name: "PATCH shopping/{id}", params: { "id": string | number }): string;
@@ -198,6 +202,13 @@ export type RouteInputs = {
     expiring_within?: number;
   };
   "GET list_locations": {};
+  "DELETE locations/{id}": {
+    id: number;
+  };
+  "PATCH locations/{id}": {
+    id: number;
+    name: string;
+  };
   "GET shopping": {};
   "POST shopping": {
     name: string;

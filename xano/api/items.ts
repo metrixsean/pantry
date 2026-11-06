@@ -1,4 +1,20 @@
-import { apiGroup, query, c, input, s, fl, inp, ref, auth, col, cmp, expr, guard, statements, withFilters } from "@xano/sdk";
+import {
+  apiGroup,
+  query,
+  c,
+  input,
+  s,
+  fl,
+  inp,
+  ref,
+  auth,
+  col,
+  cmp,
+  expr,
+  guard,
+  statements,
+  withFilters,
+} from "@xano/sdk";
 import { item } from "../tables/item.js";
 import { location } from "../tables/location.js";
 import { user } from "../tables/user.js";
@@ -154,4 +170,41 @@ export const deleteItem = query({
   input: { id: input.int({ required: true }) },
   stack: [...callerHousehold(), ...ownItem(), s.db.del({ table: item, fieldValue: inp("id") })],
   response: ref("row"),
+});
+
+export const updateLocation = query({
+  name: "locations/{id}",
+  verb: "PATCH",
+  apiGroup: itemsApi,
+  auth: user,
+  input: {
+    id: input.int({ required: true }),
+    name: input.text({ required: true, methods: ["trim"] }),
+  },
+  stack: [
+    ...callerHousehold(),
+    ...ownLocation(inp("id"), "loc"),
+    guard.require(expr(inp("name"), "!=", c.text("")), { errorType: "inputerror", message: "name it something" }),
+    s.db.edit({ table: location, fieldValue: inp("id"), row: { name: inp("name") }, as: "updated" }),
+  ],
+  response: ref("updated"),
+});
+
+export const deleteLocation = query({
+  name: "locations/{id}",
+  verb: "DELETE",
+  apiGroup: itemsApi,
+  auth: user,
+  input: { id: input.int({ required: true }) },
+  stack: [
+    ...callerHousehold(),
+    ...ownLocation(inp("id"), "loc"),
+    s.db.has({ table: item, fieldName: "location_id", fieldValue: inp("id"), as: "occupied" }),
+    guard.require(expr(ref("occupied"), "=", c.bool(false)), {
+      errorType: "badrequest",
+      message: "move or bin what's in there first",
+    }),
+    s.db.del({ table: location, fieldValue: inp("id") }),
+  ],
+  response: ref("loc"),
 });
