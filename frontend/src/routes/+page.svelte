@@ -111,6 +111,28 @@
     {/each}
   </div>
 
+  {#if expiring.length > 0}
+    <Card.Root>
+      <Card.Header>
+        <Card.Title>use these up</Card.Title>
+        <Card.Description>going off in the next 3 days</Card.Description>
+      </Card.Header>
+      <Card.Content>
+        <ul class="divide-border divide-y">
+          {#each expiring as item (item.id)}
+            <li class="flex items-baseline justify-between py-2">
+              <span>{item.name}</span>
+              <span class="text-muted-foreground text-sm">
+                {locationName(item.location_id)} ·
+                <span class="text-destructive">{item.expires_on}</span>
+              </span>
+            </li>
+          {/each}
+        </ul>
+      </Card.Content>
+    </Card.Root>
+  {/if}
+
   <Card.Root>
     <Card.Header>
       <Card.Title>in stock</Card.Title>
