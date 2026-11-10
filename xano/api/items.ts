@@ -158,6 +158,7 @@ export const updateItem = query({
   },
   stack: [
     ...callerHousehold(),
+    guard.require(expr(inp("name"), "!=", c.text("")), { errorType: "inputerror", message: "name it something" }),
     ...ownItem(),
     ...ownLocation(withFilters(inp("location_id"), fl.first_notnull(ref("row.location_id"))), "loc"),
     s.db.edit({
