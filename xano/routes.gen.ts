@@ -92,6 +92,7 @@ export const ROUTES = {
   "GET household/members": { verb: "GET", path: "/api:household/household/members" },
   "POST household/start": { verb: "POST", path: "/api:household/household/start" },
   "POST create_item": { verb: "POST", path: "/api:items/create_item" },
+  "POST create_location": { verb: "POST", path: "/api:items/create_location" },
   "DELETE items/{id}": { verb: "DELETE", path: "/api:items/items/{id}" },
   "PATCH items/{id}": { verb: "PATCH", path: "/api:items/items/{id}" },
   "GET list_items": { verb: "GET", path: "/api:items/list_items" },
@@ -125,6 +126,7 @@ export function routePath(name: "POST household/join"): string;
 export function routePath(name: "GET household/members"): string;
 export function routePath(name: "POST household/start"): string;
 export function routePath(name: "POST create_item"): string;
+export function routePath(name: "POST create_location"): string;
 export function routePath(name: "DELETE items/{id}", params: { "id": string | number }): string;
 export function routePath(name: "PATCH items/{id}", params: { "id": string | number }): string;
 export function routePath(name: "GET list_items"): string;
@@ -185,6 +187,9 @@ export type RouteInputs = {
     quantity: number;
     unit?: string;
     expires_on?: string | null;
+  };
+  "POST create_location": {
+    name: string;
   };
   "DELETE items/{id}": {
     id: number;

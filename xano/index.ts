@@ -13,6 +13,7 @@ import {
   updateItem,
   deleteItem,
   listLocations,
+  createLocation,
   updateLocation,
   deleteLocation,
 } from "./api/items.js";
@@ -46,6 +47,7 @@ export default workspace("pantry")
     updateItem,
     deleteItem,
     listLocations,
+    createLocation,
     updateLocation,
     deleteLocation,
     createHousehold,

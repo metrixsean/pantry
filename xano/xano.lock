@@ -102,6 +102,9 @@
     "query:items|POST|create_item": {
       "guid": "d0ce2cce820ad86fb4ca2f07d65105a3"
     },
+    "query:items|POST|create_location": {
+      "guid": "ff643fb1a9d162fbaa6fa646ad3286f0"
+    },
     "query:shopping|GET|shopping": {
       "guid": "93e94a3abe780436199f85b139947680"
     },

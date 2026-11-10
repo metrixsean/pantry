@@ -112,6 +112,20 @@ export const listLocations = query({
   response: ref("rows"),
 });
 
+export const createLocation = query({
+  name: "create_location",
+  verb: "POST",
+  apiGroup: itemsApi,
+  auth: user,
+  input: { name: input.text({ required: true, methods: ["trim"] }) },
+  stack: [
+    ...callerHousehold(),
+    guard.require(expr(inp("name"), "!=", c.text("")), { errorType: "inputerror", message: "name it something" }),
+    s.db.add({ table: location, row: { name: inp("name"), household_id: ref("me.household_id") }, as: "created" }),
+  ],
+  response: ref("created"),
+});
+
 const ownLocation = (id: Parameters<typeof s.db.get>[0]["fieldValue"], as: string) =>
   statements(
     s.db.get({ table: location, fieldValue: id, as }),
