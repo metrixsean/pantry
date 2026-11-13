@@ -4,7 +4,6 @@ what's in the kitchen, where it lives, and when it goes off. a shared inventory 
 
 each item has a location (pantry, fridge, freezer), a quantity and unit, and an expiry date.
 the home page lists everything in stock, soonest to expire first, and lets you add more.
-not here yet: the shopping list page (the backend for it is done, see below).
 
 ## 🔑 accounts and households
 
@@ -19,6 +18,15 @@ the backend works that out from your login token, not from anything the page sen
 
 a fresh deploy seeds a household called `home` with the invite code `home-sweet-home`, so you can
 sign up and join it straight away.
+
+## 📍 locations
+
+pantry, fridge and freezer are just where you start. `/settings` lets you add more (the garage fridge,
+the box under the stairs), rename them and bin the ones you don't use. names are unique per household
+and case doesn't count, so you can't end up with a `Fridge` and a `fridge`.
+
+a location has to be empty before it can go. open it, hit the pencil on each item and pick where it
+lives now, or finish it off.
 
 ## 🛒 shopping list
 
