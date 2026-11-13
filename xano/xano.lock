@@ -51,6 +51,9 @@
     "function:restock_entry": {
       "guid": "7cd7c7f037eff992860ff721da4f85c5"
     },
+    "function:save_location": {
+      "guid": "6ea0470f51b4b8b6ca2f4ffceb925946"
+    },
     "function:start_household": {
       "guid": "dba200af51f7c8dd2814e3947cf4fde3"
     },
@@ -125,6 +128,9 @@
     },
     "workflow_test:expiry check flags each item once": {
       "guid": "f60c9ff6b649bcf83e6df6840e53d00f"
+    },
+    "workflow_test:locations can be added and renamed but not doubled up": {
+      "guid": "57115a99f1cec52d38a49d93d4a6def9"
     },
     "workflow_test:restock tops up an existing item or adds a new one": {
       "guid": "391313fedc7bb9709bce3e68ff394e17"

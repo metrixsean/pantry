@@ -18,6 +18,7 @@ import {
 import { item } from "../tables/item.js";
 import { location } from "../tables/location.js";
 import { user } from "../tables/user.js";
+import { saveLocation } from "../functions/locations.js";
 import { callerHousehold } from "./caller.js";
 
 export const itemsApi = apiGroup({ name: "items", canonical: "items" });
@@ -120,8 +121,11 @@ export const createLocation = query({
   input: { name: input.text({ required: true, methods: ["trim"] }) },
   stack: [
     ...callerHousehold(),
-    guard.require(expr(inp("name"), "!=", c.text("")), { errorType: "inputerror", message: "name it something" }),
-    s.db.add({ table: location, row: { name: inp("name"), household_id: ref("me.household_id") }, as: "created" }),
+    s.function.run({
+      fn: saveLocation,
+      input: { household_id: ref("me.household_id"), name: inp("name") },
+      as: "created",
+    }),
   ],
   response: ref("created"),
 });
@@ -198,9 +202,11 @@ export const updateLocation = query({
   },
   stack: [
     ...callerHousehold(),
-    ...ownLocation(inp("id"), "loc"),
-    guard.require(expr(inp("name"), "!=", c.text("")), { errorType: "inputerror", message: "name it something" }),
-    s.db.edit({ table: location, fieldValue: inp("id"), row: { name: inp("name") }, as: "updated" }),
+    s.function.run({
+      fn: saveLocation,
+      input: { household_id: ref("me.household_id"), location_id: inp("id"), name: inp("name") },
+      as: "updated",
+    }),
   ],
   response: ref("updated"),
 });

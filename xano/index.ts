@@ -30,10 +30,12 @@ import { shoppingApi, listShopping, addShopping, updateShopping, restockShopping
 import { expiryDigest, checkExpiringItems } from "./functions/expiry.js";
 import { startHousehold, joinHousehold } from "./functions/household.js";
 import { restockEntry } from "./functions/shopping.js";
+import { saveLocation } from "./functions/locations.js";
 import { nightlyExpiryCheck } from "./tasks/nightly-expiry.js";
 import { expiryCheckFlagsOnce, emptyItemsListedOnce } from "./tests/expiry.js";
 import { startThenJoinHousehold } from "./tests/household.js";
 import { restockTopsUpOrAdds } from "./tests/shopping.js";
+import { locationNamesStayUnique } from "./tests/locations.js";
 
 export default workspace("pantry")
   .registerTables([household, user, location, item, alertLog, shoppingEntry])
@@ -61,6 +63,12 @@ export default workspace("pantry")
     updateShopping,
     restockShopping,
   ])
-  .registerFunctions([expiryDigest, checkExpiringItems, startHousehold, joinHousehold, restockEntry])
+  .registerFunctions([expiryDigest, checkExpiringItems, startHousehold, joinHousehold, restockEntry, saveLocation])
   .registerTasks([nightlyExpiryCheck])
-  .registerWorkflowTests([expiryCheckFlagsOnce, emptyItemsListedOnce, startThenJoinHousehold, restockTopsUpOrAdds]);
+  .registerWorkflowTests([
+    expiryCheckFlagsOnce,
+    emptyItemsListedOnce,
+    startThenJoinHousehold,
+    restockTopsUpOrAdds,
+    locationNamesStayUnique,
+  ]);
