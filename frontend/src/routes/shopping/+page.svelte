@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import ArrowLeft from "@lucide/svelte/icons/arrow-left";
   import { Button } from "$lib/components/ui/button/index.js";
-  import { addShopping, getLocations, getShopping, restock, type Location, type ShoppingEntry } from "$lib/api";
+  import { addShopping, getLocations, getShopping, restock, updateShopping, type Location, type ShoppingEntry } from "$lib/api";
   import { requireHousehold } from "$lib/session";
 
   let entries = $state<ShoppingEntry[]>([]);
@@ -39,6 +39,12 @@
 
   const tick = (entry: ShoppingEntry) =>
     locationId && run(() => restock({ id: entry.id, location_id: locationId!, expires_on: expiresOn || null }));
+
+  const setQuantity = (entry: ShoppingEntry, value: string) => {
+    const quantity = Number(value);
+    if (value === "" || quantity < 0 || quantity === entry.quantity) return;
+    run(() => updateShopping({ id: entry.id, quantity }));
+  };
 </script>
 
 <main class="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 p-8">
@@ -70,7 +76,19 @@
       <li class="flex items-center gap-3 py-2" class:text-muted-foreground={entry.done}>
         <input type="checkbox" checked={entry.done} disabled={entry.done} onchange={() => tick(entry)} />
         <span class:line-through={entry.done}>{entry.name}</span>
-        {#if entry.quantity}<span class="text-muted-foreground">× {entry.quantity}</span>{/if}
+        {#if entry.done}
+          {#if entry.quantity}<span class="text-muted-foreground">× {entry.quantity}</span>{/if}
+        {:else}
+          <input
+            class="{field} ml-auto w-20 py-1"
+            type="number"
+            min="0"
+            step="any"
+            aria-label="quantity of {entry.name}"
+            value={entry.quantity ?? ""}
+            onchange={(e) => setQuantity(entry, e.currentTarget.value)}
+          />
+        {/if}
       </li>
     {:else}
       <li class="text-muted-foreground py-2">nothing to buy 🎉</li>
