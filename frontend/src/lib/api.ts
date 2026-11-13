@@ -150,6 +150,13 @@ export function getItems(query: RouteInputs["GET list_items"] = {}): Promise<Ite
   return call(routePath("GET list_items") + (qs ? `?${qs}` : ""));
 }
 
+export function createLocation(body: RouteInputs["POST create_location"]): Promise<Location> {
+  return call(routePath("POST create_location"), {
+    method: ROUTES["POST create_location"].verb,
+    body: JSON.stringify(body),
+  });
+}
+
 export function renameLocation({ id, ...body }: RouteInputs["PATCH locations/{id}"]): Promise<Location> {
   return call(routePath("PATCH locations/{id}", { id }), {
     method: ROUTES["PATCH locations/{id}"].verb,
