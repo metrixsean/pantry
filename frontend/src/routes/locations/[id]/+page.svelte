@@ -15,10 +15,14 @@
   const id = Number(page.params.id);
 
   let place = $state<Location | null>();
+  let places = $state<Location[]>([]);
   let items = $state<Item[]>([]);
   let saving = $state<number[]>([]);
   let error = $state("");
-  let draft = $state<{ id: number; name: string; unit: string; expires_on: string } | null>(null);
+  let moved = $state("");
+  let draft = $state<{ id: number; name: string; unit: string; expires_on: string; location_id: number } | null>(
+    null,
+  );
 
   const field = "border-input bg-background rounded-md border px-2 py-1 text-sm";
 
@@ -30,6 +34,7 @@
     try {
       if (!(await requireHousehold())) return;
       const [locations, rows] = await Promise.all([getLocations(), getItems({ location_id: id })]);
+      places = locations;
       place = locations.find((l) => l.id === id) ?? null;
       items = rows;
     } catch (e) {
@@ -56,20 +61,37 @@
 
   function edit(item: Item) {
     error = "";
-    draft = { id: item.id, name: item.name, unit: item.unit ?? "", expires_on: item.expires_on ?? "" };
+    draft = {
+      id: item.id,
+      name: item.name,
+      unit: item.unit ?? "",
+      expires_on: item.expires_on ?? "",
+      location_id: item.location_id,
+    };
   }
 
   async function saveEdit(e: SubmitEvent) {
     e.preventDefault();
     if (!draft) return;
-    const { id, expires_on } = draft;
+    const { id, expires_on, location_id } = draft;
     const name = draft.name.trim();
     if (!name) return fail("name it something");
-    error = "";
+    error = moved = "";
     saving.push(id);
     try {
-      const updated = await updateItem({ id, name, unit: draft.unit.trim(), expires_on: expires_on || null });
-      items = items.map((i) => (i.id === id ? { ...i, ...updated } : i));
+      const updated = await updateItem({
+        id,
+        name,
+        unit: draft.unit.trim(),
+        expires_on: expires_on || null,
+        location_id,
+      });
+      if (updated.location_id === place?.id) {
+        items = items.map((i) => (i.id === id ? { ...i, ...updated } : i));
+      } else {
+        items = items.filter((i) => i.id !== id);
+        moved = `moved ${updated.name} to ${places.find((l) => l.id === updated.location_id)?.name ?? "somewhere else"}`;
+      }
       draft = null;
     } catch (e) {
       fail(e);
@@ -98,6 +120,8 @@
 
   {#if error}
     <p class="text-destructive text-sm">{error}</p>
+  {:else if moved}
+    <p class="text-muted-foreground text-sm">{moved}</p>
   {/if}
 
   {#if place === null}
@@ -121,6 +145,11 @@
                   <input class="{field} min-w-0 flex-1" aria-label="Name" required bind:value={draft.name} />
                   <input class="{field} w-20" aria-label="Unit" placeholder="unit" bind:value={draft.unit} />
                   <input class={field} type="date" aria-label="Expires on" bind:value={draft.expires_on} />
+                  <select class={field} aria-label="Lives in" bind:value={draft.location_id}>
+                    {#each places as l (l.id)}
+                      <option value={l.id}>{l.name}</option>
+                    {/each}
+                  </select>
                   <Button
                     type="submit"
                     variant="ghost"
@@ -177,7 +206,12 @@
             {/if}
           </tr>
         {:else}
-          <tr><td colspan="4" class="text-muted-foreground py-2">nothing in here</td></tr>
+          <tr>
+            <td colspan="4" class="text-muted-foreground py-2">
+              nothing in here. don't need it any more?
+              <a class="text-foreground underline underline-offset-4" href="/settings">bin it in settings</a>
+            </td>
+          </tr>
         {/each}
       </tbody>
     </table>
