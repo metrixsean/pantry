@@ -59,6 +59,21 @@
     }
   }
 
+  async function move(item: Item, location_id: number) {
+    if (location_id === item.location_id) return;
+    error = moved = "";
+    saving.push(item.id);
+    try {
+      const updated = await updateItem({ id: item.id, location_id });
+      items = items.filter((i) => i.id !== item.id);
+      moved = `moved ${updated.name} to ${places.find((l) => l.id === location_id)?.name ?? "somewhere else"}`;
+    } catch (e) {
+      fail(e);
+    } finally {
+      saving = saving.filter((s) => s !== item.id);
+    }
+  }
+
   function edit(item: Item) {
     error = "";
     draft = {
@@ -196,6 +211,17 @@
               </td>
               <td class="py-2" class:text-destructive={item.expiring}>{item.expires_on ?? ""}</td>
               <td class="py-2 text-right whitespace-nowrap">
+                <select
+                  class={field}
+                  aria-label="Move {item.name} to"
+                  value={item.location_id}
+                  disabled={saving.includes(item.id)}
+                  onchange={(e) => move(item, Number(e.currentTarget.value))}
+                >
+                  {#each places as l (l.id)}
+                    <option value={l.id}>{l.name}</option>
+                  {/each}
+                </select>
                 <Button variant="ghost" size="icon" aria-label="Edit {item.name}" onclick={() => edit(item)}>
                   <Pencil />
                 </Button>
