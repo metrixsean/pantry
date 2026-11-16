@@ -7,7 +7,8 @@ export const STARTER_LOCATIONS = ["pantry", "fridge", "freezer"];
 
 export const startHousehold = defineFunction({
   name: "start_household",
-  description: "Creates a household with a fresh invite code and the usual three locations, and moves the user into it.",
+  description:
+    "Creates a household with a fresh invite code and the usual three locations, and moves the user into it.",
   input: {
     user_id: input.int({ required: true }),
     name: input.text({ required: true, methods: ["trim", "min:1"] }),
