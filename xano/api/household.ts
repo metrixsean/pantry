@@ -13,9 +13,7 @@ export const createHousehold = query({
   apiGroup: householdApi,
   auth: user,
   input: { name: input.text({ required: true, methods: ["trim", "min:1"] }) },
-  stack: [
-    s.function.run({ fn: startHousehold, input: { user_id: auth("id"), name: inp("name") }, as: "house" }),
-  ],
+  stack: [s.function.run({ fn: startHousehold, input: { user_id: auth("id"), name: inp("name") }, as: "house" })],
   response: ref("house"),
 });
 
