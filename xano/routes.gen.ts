@@ -201,6 +201,7 @@ export type RouteInputs = {
     quantity?: number | null;
     unit?: string | null;
     expires_on?: string | null;
+    clear_expiry?: boolean;
   };
   "GET list_items": {
     location_id?: number;

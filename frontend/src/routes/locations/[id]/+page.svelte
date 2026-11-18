@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { page } from "$app/state";
   import ArrowLeft from "@lucide/svelte/icons/arrow-left";
+  import CalendarX from "@lucide/svelte/icons/calendar-x";
   import Check from "@lucide/svelte/icons/check";
   import Minus from "@lucide/svelte/icons/minus";
   import Pencil from "@lucide/svelte/icons/pencil";
@@ -99,6 +100,7 @@
         name,
         unit: draft.unit.trim(),
         expires_on: expires_on || null,
+        clear_expiry: !expires_on,
         location_id,
       });
       if (updated.location_id === place?.id) {
@@ -160,6 +162,15 @@
                   <input class="{field} min-w-0 flex-1" aria-label="Name" required bind:value={draft.name} />
                   <input class="{field} w-20" aria-label="Unit" placeholder="unit" bind:value={draft.unit} />
                   <input class={field} type="date" aria-label="Expires on" bind:value={draft.expires_on} />
+                  {#if draft.expires_on}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Never expires"
+                      title="never expires"
+                      onclick={() => draft && (draft.expires_on = "")}><CalendarX /></Button
+                    >
+                  {/if}
                   <select class={field} aria-label="Lives in" bind:value={draft.location_id}>
                     {#each places as l (l.id)}
                       <option value={l.id}>{l.name}</option>
