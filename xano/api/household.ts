@@ -1,4 +1,4 @@
-import { apiGroup, query, input, s, inp, ref, auth, guard, col, cmp } from "@xano/sdk";
+import { apiGroup, query, input, s, inp, ref, auth, guard, col, cmp, c, fl, withFilters } from "@xano/sdk";
 import { household } from "../tables/household.js";
 import { alertLog } from "../tables/alert_log.js";
 import { user } from "../tables/user.js";
@@ -24,6 +24,12 @@ export const joinByInvite = query({
   auth: user,
   input: { invite_code: input.text({ required: true, methods: ["trim", "lower"] }) },
   stack: [
+    s.redis.ratelimit({
+      key: withFilters(c.text("rl:join:"), fl.concat(auth("id"))),
+      max: c.int(5),
+      ttl: c.int(900),
+      error: c.text("too many invite code attempts, try again in 15 minutes"),
+    }),
     s.function.run({
       fn: joinHousehold,
       input: { user_id: auth("id"), invite_code: inp("invite_code") },
