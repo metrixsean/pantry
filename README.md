@@ -28,6 +28,10 @@ and case doesn't count, so you can't end up with a `Fridge` and a `fridge`.
 a location has to be empty before it can go. open it, hit the pencil on each item and pick where it
 lives now, or finish it off.
 
+ate something? the minus button on a location page calls `POST items/{id}/consume`, which knocks one
+off (send `amount` for half a bag of rice). it stops at zero rather than going negative, and the
+nightly job puts the empties on the shopping list.
+
 ## 🛒 shopping list
 
 the household shares one list. `GET /shopping` returns it (open stuff first), `POST /shopping` adds

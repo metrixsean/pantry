@@ -177,6 +177,13 @@ export function updateItem({ id, ...body }: RouteInputs["PATCH items/{id}"]): Pr
   });
 }
 
+export function consumeItem({ id, ...body }: RouteInputs["POST items/{id}/consume"]): Promise<Item> {
+  return call(routePath("POST items/{id}/consume", { id }), {
+    method: ROUTES["POST items/{id}/consume"].verb,
+    body: JSON.stringify(body),
+  });
+}
+
 export function deleteItem(id: number): Promise<Item> {
   return call(routePath("DELETE items/{id}", { id }), {
     method: ROUTES["DELETE items/{id}"].verb,

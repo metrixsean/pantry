@@ -10,7 +10,7 @@
   import Trash2 from "@lucide/svelte/icons/trash-2";
   import X from "@lucide/svelte/icons/x";
   import { Button } from "$lib/components/ui/button/index.js";
-  import { deleteItem, getItems, getLocations, updateItem, type Item, type Location } from "$lib/api";
+  import { consumeItem, deleteItem, getItems, getLocations, updateItem, type Item, type Location } from "$lib/api";
   import { requireHousehold } from "$lib/session";
 
   const id = Number(page.params.id);
@@ -55,6 +55,19 @@
     } catch (e) {
       fail(e);
       return false;
+    } finally {
+      saving = saving.filter((s) => s !== item.id);
+    }
+  }
+
+  async function consume(item: Item) {
+    error = "";
+    saving.push(item.id);
+    try {
+      const updated = await consumeItem({ id: item.id });
+      items = items.map((i) => (i.id === item.id ? { ...i, ...updated } : i));
+    } catch (e) {
+      fail(e);
     } finally {
       saving = saving.filter((s) => s !== item.id);
     }
@@ -195,7 +208,7 @@
                     size="icon"
                     aria-label="One less {item.name}"
                     disabled={item.quantity <= 0 || saving.includes(item.id)}
-                    onclick={() => setQuantity(item, Math.max(0, item.quantity - 1))}><Minus /></Button
+                    onclick={() => consume(item)}><Minus /></Button
                   >
                   <input
                     class="{field} w-20"
