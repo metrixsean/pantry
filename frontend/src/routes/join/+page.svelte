@@ -7,7 +7,7 @@
   import * as Card from "$lib/components/ui/card/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import ModeToggle from "$lib/components/mode-toggle.svelte";
-  import { joinHousehold, signOut, startHousehold, type Me } from "$lib/api";
+  import { ApiError, joinHousehold, signOut, startHousehold, type Me } from "$lib/api";
   import { requireUser } from "$lib/session";
 
   let me = $state<Me | null>(null);
@@ -26,7 +26,8 @@
       await action();
       await goto("/");
     } catch (e) {
-      error = e instanceof Error ? e.message : String(e);
+      if (e instanceof ApiError && e.status === 429) error = "too many guesses. give it 15 minutes and double-check the code.";
+      else error = e instanceof Error ? e.message : String(e);
     } finally {
       busy = false;
     }
