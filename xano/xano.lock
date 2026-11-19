@@ -42,6 +42,9 @@
     "function:check_expiring_items": {
       "guid": "10f2e242a7dcfb935155ad06a45d3d58"
     },
+    "function:consume_item": {
+      "guid": "3951d5664bdf4fa7a81c3b902c5c6f51"
+    },
     "function:expiry_digest": {
       "guid": "7b59e4c43defade6f78d1a7ee4c7136f"
     },
@@ -108,6 +111,9 @@
     "query:items|POST|create_location": {
       "guid": "ff643fb1a9d162fbaa6fa646ad3286f0"
     },
+    "query:items|POST|items/{id}/consume": {
+      "guid": "621bd432ce1f727f001caabb84ad75e7"
+    },
     "query:shopping|GET|shopping": {
       "guid": "93e94a3abe780436199f85b139947680"
     },
@@ -122,6 +128,9 @@
     },
     "task:nightly_expiry_check": {
       "guid": "1b962a8e850511d9198f7fa253297935"
+    },
+    "workflow_test:consuming an item counts down and stops at zero": {
+      "guid": "20c424cda889c1ff9cc979e7664a0b09"
     },
     "workflow_test:empty items land on the shopping list once": {
       "guid": "d7377fd5e82ff8f210a59fbe732a9047"

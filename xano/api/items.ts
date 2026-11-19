@@ -19,6 +19,7 @@ import { item } from "../tables/item.js";
 import { location } from "../tables/location.js";
 import { user } from "../tables/user.js";
 import { saveLocation } from "../functions/locations.js";
+import { consumeItem } from "../functions/items.js";
 import { callerHousehold } from "./caller.js";
 
 export const itemsApi = apiGroup({ name: "items", canonical: "items" });
@@ -197,6 +198,20 @@ export const deleteItem = query({
   input: { id: input.int({ required: true }) },
   stack: [...callerHousehold(), ...ownItem(), s.db.del({ table: item, fieldValue: inp("id") })],
   response: ref("row"),
+});
+
+export const consume = query({
+  name: "items/{id}/consume",
+  verb: "POST",
+  apiGroup: itemsApi,
+  auth: user,
+  input: { id: input.int({ required: true }), amount: input.decimal({ nullable: true }) },
+  stack: [
+    ...callerHousehold(),
+    ...ownItem(),
+    s.function.run({ fn: consumeItem, input: { item_id: inp("id"), amount: inp("amount") }, as: "updated" }),
+  ],
+  response: ref("updated"),
 });
 
 export const updateLocation = query({

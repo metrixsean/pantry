@@ -95,6 +95,7 @@ export const ROUTES = {
   "POST create_location": { verb: "POST", path: "/api:items/create_location" },
   "DELETE items/{id}": { verb: "DELETE", path: "/api:items/items/{id}" },
   "PATCH items/{id}": { verb: "PATCH", path: "/api:items/items/{id}" },
+  "POST items/{id}/consume": { verb: "POST", path: "/api:items/items/{id}/consume" },
   "GET list_items": { verb: "GET", path: "/api:items/list_items" },
   "GET list_locations": { verb: "GET", path: "/api:items/list_locations" },
   "DELETE locations/{id}": { verb: "DELETE", path: "/api:items/locations/{id}" },
@@ -129,6 +130,7 @@ export function routePath(name: "POST create_item"): string;
 export function routePath(name: "POST create_location"): string;
 export function routePath(name: "DELETE items/{id}", params: { "id": string | number }): string;
 export function routePath(name: "PATCH items/{id}", params: { "id": string | number }): string;
+export function routePath(name: "POST items/{id}/consume", params: { "id": string | number }): string;
 export function routePath(name: "GET list_items"): string;
 export function routePath(name: "GET list_locations"): string;
 export function routePath(name: "DELETE locations/{id}", params: { "id": string | number }): string;
@@ -202,6 +204,10 @@ export type RouteInputs = {
     unit?: string | null;
     expires_on?: string | null;
     clear_expiry?: boolean;
+  };
+  "POST items/{id}/consume": {
+    id: number;
+    amount?: number | null;
   };
   "GET list_items": {
     location_id?: number;
