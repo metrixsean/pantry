@@ -54,7 +54,7 @@ export const XANO_HOST: string =
 
 import type { InferResponse } from "@xano/sdk";
 import type { me } from "../../../xano/api/auth.js";
-import type { listItems, listLocations } from "../../../xano/api/items.js";
+import type { consume, listItems, listLocations } from "../../../xano/api/items.js";
 import type { getHousehold, listAlerts, listMembers } from "../../../xano/api/household.js";
 import type { listShopping } from "../../../xano/api/shopping.js";
 import { ROUTES, routePath, type RouteInputs } from "../../../xano/routes.gen.js";
@@ -63,6 +63,7 @@ export type Me = InferResponse<typeof me>;
 export type Item = InferResponse<typeof listItems>[number];
 export type Location = InferResponse<typeof listLocations>[number];
 export type NewItem = RouteInputs["POST create_item"];
+export type Eaten = InferResponse<typeof consume>;
 export type Household = InferResponse<typeof getHousehold>;
 export type Member = InferResponse<typeof listMembers>[number];
 export type AlertLogEntry = InferResponse<typeof listAlerts>[number];
@@ -177,7 +178,7 @@ export function updateItem({ id, ...body }: RouteInputs["PATCH items/{id}"]): Pr
   });
 }
 
-export function consumeItem({ id, ...body }: RouteInputs["POST items/{id}/consume"]): Promise<Item> {
+export function consumeItem({ id, ...body }: RouteInputs["POST items/{id}/consume"]): Promise<Eaten> {
   return call(routePath("POST items/{id}/consume", { id }), {
     method: ROUTES["POST items/{id}/consume"].verb,
     body: JSON.stringify(body),

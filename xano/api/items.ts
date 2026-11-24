@@ -20,6 +20,7 @@ import { location } from "../tables/location.js";
 import { user } from "../tables/user.js";
 import { saveLocation } from "../functions/locations.js";
 import { consumeItem } from "../functions/items.js";
+import { listIfMissing } from "../functions/shopping.js";
 import { callerHousehold } from "./caller.js";
 
 export const itemsApi = apiGroup({ name: "items", canonical: "items" });
@@ -186,6 +187,15 @@ export const updateItem = query({
       },
       as: "updated",
     }),
+    s.conditional({
+      when: expr(ref("updated.quantity"), "<=", c.decimal(0)),
+      then: [
+        s.function.run({
+          fn: listIfMissing,
+          input: { household_id: ref("me.household_id"), name: ref("updated.name") },
+        }),
+      ],
+    }),
   ],
   response: ref("updated"),
 });
@@ -209,9 +219,9 @@ export const consume = query({
   stack: [
     ...callerHousehold(),
     ...ownItem(),
-    s.function.run({ fn: consumeItem, input: { item_id: inp("id"), amount: inp("amount") }, as: "updated" }),
+    s.function.run({ fn: consumeItem, input: { item_id: inp("id"), amount: inp("amount") }, as: "eaten" }),
   ],
-  response: ref("updated"),
+  response: ref("eaten"),
 });
 
 export const updateLocation = query({

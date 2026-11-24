@@ -29,8 +29,9 @@ a location has to be empty before it can go. open it, hit the pencil on each ite
 lives now, or finish it off.
 
 ate something? the minus button on a location page calls `POST items/{id}/consume`, which knocks one
-off (send `amount` for half a bag of rice). it stops at zero rather than going negative, and the
-nightly job puts the empties on the shopping list.
+off (send `amount` for half a bag of rice). it stops at zero rather than going negative, and the last
+one goes straight onto the shopping list. the response is `{ item, listed }`, where `listed` is false
+if it was already on there. setting the quantity to 0 by hand (`PATCH items/{id}`) lists it too.
 
 ## 🛒 shopping list
 
@@ -38,7 +39,9 @@ the household shares one list. `GET /shopping` returns it (open stuff first), `P
 something, and `PATCH /shopping/{id}` renames it, changes the quantity or ticks it off. bought it?
 `POST /shopping/{id}/restock` with a location and a new expiry date ticks it off and puts it back in
 stock: an item with the same name in that location gets topped up, otherwise a new one is added.
-anything that hits zero lands on the list by itself overnight.
+anything that hits zero lands on the list by itself the moment it does, and the nightly job sweeps up
+any empties that slipped past (say, something added with a quantity of 0). an open entry with the
+same name blocks a duplicate, a ticked off one doesn't.
 
 ## 📧 expiry alerts
 

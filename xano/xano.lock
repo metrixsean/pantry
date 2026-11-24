@@ -51,6 +51,9 @@
     "function:join_household": {
       "guid": "0de2b6e6d80f71a0d7943cd147b003cd"
     },
+    "function:list_if_missing": {
+      "guid": "a9dbb0033c10898eeddc9cce47b7473a"
+    },
     "function:restock_entry": {
       "guid": "7cd7c7f037eff992860ff721da4f85c5"
     },
@@ -131,6 +134,9 @@
     },
     "workflow_test:consuming an item counts down and stops at zero": {
       "guid": "20c424cda889c1ff9cc979e7664a0b09"
+    },
+    "workflow_test:eating the last one puts it on the shopping list straight away": {
+      "guid": "b1ae9eab7c6a046c8a61101cba4c0ccf"
     },
     "workflow_test:empty items land on the shopping list once": {
       "guid": "d7377fd5e82ff8f210a59fbe732a9047"
