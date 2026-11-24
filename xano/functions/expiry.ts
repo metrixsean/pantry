@@ -19,7 +19,7 @@ import { household } from "../tables/household.js";
 import { location } from "../tables/location.js";
 import { item } from "../tables/item.js";
 import { alertLog } from "../tables/alert_log.js";
-import { shoppingEntry } from "../tables/shopping_entry.js";
+import { listIfMissing } from "./shopping.js";
 
 export const EXPIRY_WINDOW_DAYS = 3;
 export const WEEKLY_WINDOW_DAYS = 7;
@@ -182,22 +182,14 @@ export const checkExpiringItems = defineFunction({
       list: ref("empty"),
       as: "row",
       body: [
-        s.db.query({
-          table: shoppingEntry,
-          where: [
-            expr(col("household_id"), "=", ref("row.household_id")),
-            expr(col("name"), "=", ref("row.name")),
-            expr(col("done"), "=", c.bool(false)),
-          ],
-          returnType: "exists",
-          as: "on_list",
+        s.function.run({
+          fn: listIfMissing,
+          input: { household_id: ref("row.household_id"), name: ref("row.name") },
+          as: "added",
         }),
         s.conditional({
-          when: expr(ref("on_list"), "=", c.bool(false)),
-          then: [
-            s.db.add({ table: shoppingEntry, row: { name: ref("row.name"), household_id: ref("row.household_id") } }),
-            s.update_var("listed", withFilters(ref("listed"), fl.add(1))),
-          ],
+          when: expr(ref("added.listed"), "=", c.bool(true)),
+          then: [s.update_var("listed", withFilters(ref("listed"), fl.add(1)))],
         }),
       ],
     }),

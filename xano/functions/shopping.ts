@@ -3,6 +3,36 @@ import { location } from "../tables/location.js";
 import { item } from "../tables/item.js";
 import { shoppingEntry } from "../tables/shopping_entry.js";
 
+export const listIfMissing = defineFunction({
+  name: "list_if_missing",
+  description: "Adds a name to the household's shopping list unless it's already on there and not ticked off.",
+  input: {
+    household_id: input.int({ required: true }),
+    name: input.text({ required: true }),
+  },
+  stack: [
+    s.db.query({
+      table: shoppingEntry,
+      where: [
+        expr(col("household_id"), "=", inp("household_id")),
+        expr(col("name"), "=", inp("name")),
+        expr(col("done"), "=", c.bool(false)),
+      ],
+      returnType: "exists",
+      as: "on_list",
+    }),
+    s.set_var("listed", c.bool(false)),
+    s.conditional({
+      when: expr(ref("on_list"), "=", c.bool(false)),
+      then: [
+        s.db.add({ table: shoppingEntry, row: { name: inp("name"), household_id: inp("household_id") } }),
+        s.update_var("listed", c.bool(true)),
+      ],
+    }),
+  ],
+  response: { listed: ref("listed") },
+});
+
 export const restockEntry = defineFunction({
   name: "restock_entry",
   description:
