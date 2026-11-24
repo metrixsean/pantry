@@ -20,7 +20,7 @@
   let items = $state<Item[]>([]);
   let saving = $state<number[]>([]);
   let error = $state("");
-  let moved = $state("");
+  let note = $state<{ text: string; shopping?: boolean } | null>(null);
   let draft = $state<{ id: number; name: string; unit: string; expires_on: string; location_id: number } | null>(
     null,
   );
@@ -29,6 +29,10 @@
 
   function fail(e: unknown) {
     error = e instanceof Error ? e.message : String(e);
+  }
+
+  function placeName(location_id: number) {
+    return places.find((l) => l.id === location_id)?.name ?? "somewhere else";
   }
 
   onMount(async () => {
@@ -47,10 +51,14 @@
     if (quantity === item.quantity) return true;
     if (!Number.isFinite(quantity) || quantity < 0) return false;
     error = "";
+    note = null;
     saving.push(item.id);
     try {
       const updated = await updateItem({ id: item.id, quantity });
       items = items.map((i) => (i.id === item.id ? { ...i, ...updated } : i));
+      if (updated.quantity <= 0 && item.quantity > 0) {
+        note = { text: `${updated.name} is all gone, it's on the shopping list`, shopping: true };
+      }
       return true;
     } catch (e) {
       fail(e);
@@ -62,10 +70,19 @@
 
   async function consume(item: Item) {
     error = "";
+    note = null;
     saving.push(item.id);
     try {
-      const updated = await consumeItem({ id: item.id });
+      const { item: updated, listed } = await consumeItem({ id: item.id });
       items = items.map((i) => (i.id === item.id ? { ...i, ...updated } : i));
+      if (updated.quantity <= 0) {
+        note = {
+          text: listed
+            ? `that was the last ${item.name}, it's on the shopping list now`
+            : `that was the last ${item.name}, it was already on the shopping list`,
+          shopping: true,
+        };
+      }
     } catch (e) {
       fail(e);
     } finally {
@@ -75,12 +92,13 @@
 
   async function move(item: Item, location_id: number) {
     if (location_id === item.location_id) return;
-    error = moved = "";
+    error = "";
+    note = null;
     saving.push(item.id);
     try {
       const updated = await updateItem({ id: item.id, location_id });
       items = items.filter((i) => i.id !== item.id);
-      moved = `moved ${updated.name} to ${places.find((l) => l.id === location_id)?.name ?? "somewhere else"}`;
+      note = { text: `moved ${updated.name} to ${placeName(location_id)}` };
     } catch (e) {
       fail(e);
     } finally {
@@ -105,7 +123,8 @@
     const { id, expires_on, location_id } = draft;
     const name = draft.name.trim();
     if (!name) return fail("name it something");
-    error = moved = "";
+    error = "";
+    note = null;
     saving.push(id);
     try {
       const updated = await updateItem({
@@ -120,7 +139,7 @@
         items = items.map((i) => (i.id === id ? { ...i, ...updated } : i));
       } else {
         items = items.filter((i) => i.id !== id);
-        moved = `moved ${updated.name} to ${places.find((l) => l.id === updated.location_id)?.name ?? "somewhere else"}`;
+        note = { text: `moved ${updated.name} to ${placeName(updated.location_id)}` };
       }
       draft = null;
     } catch (e) {
@@ -150,8 +169,13 @@
 
   {#if error}
     <p class="text-destructive text-sm">{error}</p>
-  {:else if moved}
-    <p class="text-muted-foreground text-sm">{moved}</p>
+  {:else if note}
+    <p class="text-muted-foreground text-sm">
+      {note.text}
+      {#if note.shopping}
+        <a class="text-foreground underline underline-offset-4" href="/shopping">see the list</a>
+      {/if}
+    </p>
   {/if}
 
   {#if place === null}
