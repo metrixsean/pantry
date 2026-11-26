@@ -45,6 +45,9 @@
     "function:consume_item": {
       "guid": "3951d5664bdf4fa7a81c3b902c5c6f51"
     },
+    "function:edit_item": {
+      "guid": "9c4788f05278fdb8e8dcb89c5f032f7c"
+    },
     "function:expiry_digest": {
       "guid": "7b59e4c43defade6f78d1a7ee4c7136f"
     },
@@ -137,6 +140,9 @@
     },
     "workflow_test:eating the last one puts it on the shopping list straight away": {
       "guid": "b1ae9eab7c6a046c8a61101cba4c0ccf"
+    },
+    "workflow_test:editing an item keeps what you leave out and clear_expiry means it never expires": {
+      "guid": "7879e57af371d6662e0de74245a5fbbc"
     },
     "workflow_test:empty items land on the shopping list once": {
       "guid": "d7377fd5e82ff8f210a59fbe732a9047"

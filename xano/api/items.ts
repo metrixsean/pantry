@@ -19,8 +19,7 @@ import { item } from "../tables/item.js";
 import { location } from "../tables/location.js";
 import { user } from "../tables/user.js";
 import { saveLocation } from "../functions/locations.js";
-import { consumeItem } from "../functions/items.js";
-import { listIfMissing } from "../functions/shopping.js";
+import { consumeItem, editItem } from "../functions/items.js";
 import { callerHousehold } from "./caller.js";
 
 export const itemsApi = apiGroup({ name: "items", canonical: "items" });
@@ -165,36 +164,19 @@ export const updateItem = query({
   },
   stack: [
     ...callerHousehold(),
-    guard.require(expr(inp("name"), "!=", c.text("")), { errorType: "inputerror", message: "name it something" }),
-    ...ownItem(),
-    ...ownLocation(withFilters(inp("location_id"), fl.first_notnull(ref("row.location_id"))), "loc"),
-    s.set_var("expires_on", withFilters(inp("expires_on"), fl.first_notnull(ref("row.expires_on")))),
-    s.set_var("expiring", ref("row.expiring")),
-    s.conditional({
-      when: expr(inp("clear_expiry"), "=", c.bool(true)),
-      then: [s.update_var("expires_on", c.null()), s.update_var("expiring", c.bool(false))],
-    }),
-    s.db.edit({
-      table: item,
-      fieldValue: inp("id"),
-      row: {
-        name: withFilters(inp("name"), fl.first_notnull(ref("row.name"))),
-        location_id: ref("loc.id"),
-        quantity: withFilters(inp("quantity"), fl.first_notnull(ref("row.quantity"))),
-        unit: withFilters(inp("unit"), fl.first_notnull(ref("row.unit"))),
-        expires_on: ref("expires_on"),
-        expiring: ref("expiring"),
+    s.function.run({
+      fn: editItem,
+      input: {
+        item_id: inp("id"),
+        household_id: ref("me.household_id"),
+        name: inp("name"),
+        location_id: inp("location_id"),
+        quantity: inp("quantity"),
+        unit: inp("unit"),
+        expires_on: inp("expires_on"),
+        clear_expiry: inp("clear_expiry"),
       },
       as: "updated",
-    }),
-    s.conditional({
-      when: expr(ref("updated.quantity"), "<=", c.decimal(0)),
-      then: [
-        s.function.run({
-          fn: listIfMissing,
-          input: { household_id: ref("me.household_id"), name: ref("updated.name") },
-        }),
-      ],
     }),
   ],
   response: ref("updated"),
