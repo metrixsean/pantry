@@ -32,13 +32,13 @@ import { expiryDigest, checkExpiringItems } from "./functions/expiry.js";
 import { startHousehold, joinHousehold } from "./functions/household.js";
 import { restockEntry, listIfMissing } from "./functions/shopping.js";
 import { saveLocation } from "./functions/locations.js";
-import { consumeItem } from "./functions/items.js";
+import { consumeItem, editItem } from "./functions/items.js";
 import { nightlyExpiryCheck } from "./tasks/nightly-expiry.js";
 import { expiryCheckFlagsOnce, emptyItemsListedOnce } from "./tests/expiry.js";
 import { startThenJoinHousehold } from "./tests/household.js";
 import { restockTopsUpOrAdds } from "./tests/shopping.js";
 import { locationNamesStayUnique } from "./tests/locations.js";
-import { consumeBottomsOutAtZero, consumeListsEmptiesRightAway } from "./tests/items.js";
+import { consumeBottomsOutAtZero, consumeListsEmptiesRightAway, editItemClearsExpiry } from "./tests/items.js";
 
 export default workspace("pantry")
   .registerTables([household, user, location, item, alertLog, shoppingEntry])
@@ -76,6 +76,7 @@ export default workspace("pantry")
     listIfMissing,
     saveLocation,
     consumeItem,
+    editItem,
   ])
   .registerTasks([nightlyExpiryCheck])
   .registerWorkflowTests([
@@ -86,4 +87,5 @@ export default workspace("pantry")
     locationNamesStayUnique,
     consumeBottomsOutAtZero,
     consumeListsEmptiesRightAway,
+    editItemClearsExpiry,
   ]);
